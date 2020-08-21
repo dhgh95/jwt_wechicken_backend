@@ -8,7 +8,7 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING(20),
       },
       gmail_id: {
-        type: DataTypes.STRING(20),
+        type: DataTypes.STRING(50),
         allowNull: false,
       },
       gmail: {
@@ -18,37 +18,27 @@ module.exports = (sequelize) => {
       blog_address: {
         type: DataTypes.STRING(30),
       },
-      blog_type_id: {
-        type: DataTypes.INTEGER,
-        reference: {
-          model: "blog_types",
-          key: "id",
-        },
+      user_thumbnail: {
+        type: DataTypes.STRING,
       },
-      introduction: {
-        type: DataTypes.STRING(30),
+      recent_scraped: {
+        type: DataTypes.STRING,
       },
       admin: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
       },
-      user_thumbnail: {
-        type: DataTypes.STRING(50),
-      },
-      wecode_nth: {
-        type: DataTypes.INTEGER,
-        reference: {
-          model: "wecode_nth",
-          key: "nth",
-        },
-      },
-      recent_scraped: {
-        type: DataTypes.STRING(50),
-      },
       is_group_joined: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
+      },
+      wecode_nth: {
+        type: DataTypes.INTEGER,
+      },
+      blog_type_id: {
+        type: DataTypes.INTEGER,
       },
       created_at: {
         type: DataTypes.DATE,

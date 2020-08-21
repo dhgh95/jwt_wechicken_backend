@@ -2,15 +2,11 @@ const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
   return sequelize.define(
-    "wecode_nth",
+    "dates",
     {
-      title: {
-        type: DataTypes.STRING(45),
-      },
-      nth: {
-        type: DataTypes.INTEGER,
+      date: {
+        type: DataTypes.STRING(30),
         allowNull: false,
-        primaryKey: true,
       },
     },
     {
