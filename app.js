@@ -18,7 +18,7 @@ app.use(logger);
 // routes
 routes(app);
 
-//middlewares
+//middleware
 
 app.use((error, req, res, next) => {
   const { statusCode, message } = error;
