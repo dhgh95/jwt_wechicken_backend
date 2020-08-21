@@ -27,10 +27,10 @@ moment.tz.setDefault("Asia/Seoul");
       }`;
       const thumbnail = post.querySelector("a > div > img")?.src;
       const title = post.querySelector("a > h2").innerText;
-      const subTitle = post.querySelector("p")?.innerText;
+      const subtitle = post.querySelector("p")?.innerText;
       const date = post.querySelector("div.subinfo > span").innerText;
 
-      return { link, thumbnail, title, subTitle, date };
+      return { title, subtitle, date, link, thumbnail };
     });
   });
 
