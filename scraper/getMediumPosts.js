@@ -5,10 +5,10 @@ const months = require("./months");
 
 const getMediumPosts = async (mediumLink) => {
   const browser = await puppeteer.launch({
-    headless: false,
+    headless: true,
     defaultViewport: {
-      width: 1920,
-      height: 1080,
+      width: 1080,
+      height: 840,
     },
   });
 
@@ -28,22 +28,23 @@ const getMediumPosts = async (mediumLink) => {
       ];
 
       return contents.map((content) => {
+        const thumbnail = content.querySelector(
+          "section > figure > div > div > div > div > img",
+        )?.src;
+
         const title = content.querySelector("h1")?.innerText;
         const subtitle = content.querySelector("h2")?.innerText;
         const date = content.querySelector(
           "div > div > div > div > div > span > span > div > a",
         )?.innerText;
-        const thumbnail = content.querySelector(
-          "div > div > a > div > section > figure > div > div > div > img",
-        )?.attributes.src?.value;
         const link = content.querySelector("div > div:nth-child(2) > a").href;
 
         return {
           title,
           subtitle,
-          thumbnail,
           date,
           link,
+          thumbnail,
         };
       });
     });
@@ -67,9 +68,8 @@ const main = async () => {
   mediumPosts = mediumPosts.map((post) => {
     return {
       ...post,
-      user_name: faker.internet.userName().slice(0, 6),
-      user_thumbnail: faker.image.avatar(),
       date: changeDateFormat(post.date),
+      type: "medium",
     };
   });
 
