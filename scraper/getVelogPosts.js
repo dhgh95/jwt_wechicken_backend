@@ -19,23 +19,18 @@ moment.tz.setDefault("Asia/Seoul");
 
   let velogcrawling = await page.evaluate(() => {
     const posts = document.querySelectorAll(
-      "#root > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(3) > div > div"
+      "#root > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(3) > div > div",
     );
     return [...posts].map((post) => {
       const link = `https://velog.io${
         post.querySelector("a").attributes.href.value
       }`;
-
-      const thumnail = post.querySelector("a > div > img")?.attributes.src
-        .value;
-
+      const thumbnail = post.querySelector("a > div > img")?.src;
       const title = post.querySelector("a > h2").innerText;
-
       const subTitle = post.querySelector("p")?.innerText;
-
       const date = post.querySelector("div.subinfo > span").innerText;
 
-      return { link, thumnail, title, subTitle, date };
+      return { link, thumbnail, title, subTitle, date };
     });
   });
 
@@ -62,7 +57,7 @@ moment.tz.setDefault("Asia/Seoul");
   };
 
   velogcrawling = velogcrawling.map((post) => {
-    return { ...post, date: refineDate(post.date) };
+    return { ...post, date: refineDate(post.date), type: "velog" };
   });
 
   fs.writeFile("./json/velog.json", JSON.stringify(velogcrawling, null, 2))
