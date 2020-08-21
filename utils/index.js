@@ -6,4 +6,3 @@ module.exports = {
   errorGenerator,
   getRandomIntInclusive,
   shuffleArray,
-};
