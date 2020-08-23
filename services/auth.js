@@ -10,6 +10,7 @@ const googleAuth = async (googleToken) => {
 
 const createToken = (userId) => {
   const token = jwt.sign({ id: userId.toString() }, process.env.SECRET_KEY);
+  return token;
 };
 
 module.exports = { googleAuth, createToken };
