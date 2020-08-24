@@ -8,9 +8,11 @@ const googleSignUp = async (req, res, next) => {
     const { googleToken } = req.query;
     const googleUser = googleAuth(googleToken);
 
-    const duplicateUser = await model["Users"].findOne({ gmail_id: googleUser.sub });
+    const duplicateUser = await model["Users"].findOne({
+      gmail_id: googleUser.sub,
+    });
     duplicateUser && errorGenerator("User exists", 404);
-    
+
     const { sub, email } = googleUser;
     await model["Users"].create({ gmail_id: sub, email });
 
@@ -29,7 +31,7 @@ const additional = async (req, res, next) => {
       wecode_nth,
       blog_type,
       introduction,
-      user_thumbnail
+      user_thumbnail,
     } = req.body;
 
     const additionalInfo = {
@@ -38,9 +40,9 @@ const additional = async (req, res, next) => {
       blog_type,
       wecode_nth,
       introduction,
-      user_thumbnail
+      user_thumbnail,
     };
-    await model['Users'].update(additionalInfo, {where: {email: gmail}});
+    await model["Users"].update(additionalInfo, { where: { email: gmail } });
 
     res.status(201).json({ message: "User created!!!" });
   } catch (err) {
@@ -48,13 +50,13 @@ const additional = async (req, res, next) => {
   }
 };
 
-const login = (req, res, next) => {
+const login = async (req, res, next) => {
   try {
     const googleToken = req.params;
     const googleUser = googleAuth(googleToken);
     const user = await model["Users"].findOne({ gmail_id: googleUser.sub });
     !user && errorGenerator("User not exists", 404);
-    const token = createToken(user.id)
+    const token = createToken(user.id);
 
     res.status(201).json({ message: "SUCCESS", token });
   } catch (err) {
