@@ -2,15 +2,14 @@ const axios = require("axios");
 const jwt = require("jsonwebtoken");
 
 const googleAuth = async (googleToken) => {
-  const { sub, email, name, picture } = axios.get(
+  const { data } = await axios.get(
     `https://oauth2.googleapis.com/tokeninfo?id_token=${googleToken}`
   );
-  return { sub, email, name, picture };
+  return data;
 };
 
-const createToken = (userId) => {
-  const token = jwt.sign({ id: userId.toString() }, process.env.SECRET_KEY);
-  return token;
+const createToken = (user_id, wecode_nth) => {
+  return jwt.sign({ user_id, wecode_nth }, process.env.SECRET_KEY);
 };
 
 module.exports = { googleAuth, createToken };
