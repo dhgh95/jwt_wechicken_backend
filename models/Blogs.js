@@ -5,34 +5,26 @@ module.exports = (sequelize) => {
     "blogs",
     {
       title: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       subtitle: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING,
       },
       thumbnail: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING,
       },
       link: {
-        type: DataTypes.STRING(45),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "users",
-          key: "id",
-        },
       },
-      dates_id: {
+      date_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "dates",
-          key: "id",
-        },
       },
     },
     {
