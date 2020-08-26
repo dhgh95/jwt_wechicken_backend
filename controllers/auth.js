@@ -32,6 +32,7 @@ const additional = async (req, res, next) => {
       wecode_nth,
       user_thumbnail,
       gmail_id,
+      gmail,
     } = req.body;
 
     await model["Wecode_nth"].findOrCreate({
@@ -45,12 +46,13 @@ const additional = async (req, res, next) => {
       blog_address,
       blog_type,
       wecode_nth,
-      user_thumbnail,
+      user_thumbnail: req.file ? req.file.path : user_thumbnail,
       gmail_id,
+      gmail,
     };
 
     await model["Users"].create(additionalInfo);
-    const user = await model["Users"].findOne({ google_id });
+    const user = await model["Users"].findOne({ gmail_id });
     const token = createToken(user.id, user.wecode_nth);
 
     res.status(201).json({ message: "User created!!!", token });
