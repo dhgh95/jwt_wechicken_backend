@@ -1,4 +1,5 @@
 const puppeteer = require("puppeteer");
+const refinePostsForDatabase = require("./refinePostsForDatabase");
 
 class puppeteerInfiniteScroll {
   constructor() {
@@ -81,9 +82,9 @@ class puppeteerInfiniteScroll {
 
         if (resUrl.includes(endpoint) && !this.isEndReached) {
           const isEnd = await this.scrollDown(blogType);
-          if (isEnd) {
-            const allPosts =
-              !this.isScraped && (await this.extract(evaluateCallBack));
+          if (isEnd && !this.isScraped) {
+            let allPosts = await this.extract(evaluateCallBack);
+            allPosts = refinePostsForDatabase(allPosts, blogType);
             console.log(allPosts);
           }
         }
