@@ -14,6 +14,7 @@ app.use(hpp());
 app.use(helmet());
 app.use(cors());
 app.use(logger);
+app.use("/images", express.static("images"));
 
 // routes
 routes(app);
