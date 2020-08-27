@@ -1,7 +1,14 @@
 const express = require("express");
-const mygroupController = require("../controllers/mygroup");
+const {
+  getPageDetails,
+  joinGroup,
+  updateGroup,
+} = require("../controllers/mygroup");
+const { isAuth } = require("../middlewares");
 const router = express.Router();
 
-router.get("/", mygroupController.getPageDetails);
+router.get("/", getPageDetails);
+router.post("/join", isAuth, joinGroup);
+router.post("/update", isAuth, updateGroup);
 
 module.exports = router;
