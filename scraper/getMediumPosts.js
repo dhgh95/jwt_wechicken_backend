@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer");
-const faker = require("faker");
 const fs = require("fs").promises;
 const months = require("./months");
+const mediumEvalute = require("./mediumEvaluate");
 
 const getMediumPosts = async (mediumLink) => {
   const browser = await puppeteer.launch({
@@ -20,34 +20,7 @@ const getMediumPosts = async (mediumLink) => {
       waitUntil: "load",
     });
 
-    posts = await page.evaluate(() => {
-      const [_, __, ___, ...contents] = [
-        ...document.querySelector(
-          "#root > div > section > div:nth-child(3) > div:nth-child(1)",
-        ).children,
-      ];
-
-      return contents.map((content) => {
-        const thumbnail = content.querySelector(
-          "section > figure > div > div > div > div > img",
-        )?.src;
-
-        const title = content.querySelector("h1")?.innerText;
-        const subtitle = content.querySelector("h2")?.innerText;
-        const date = content.querySelector(
-          "div > div > div > div > div > span > span > div > a",
-        )?.innerText;
-        const link = content.querySelector("div > div:nth-child(2) > a").href;
-
-        return {
-          title,
-          subtitle,
-          date,
-          link,
-          thumbnail,
-        };
-      });
-    });
+    posts = await page.evaluate(mediumEvalute);
   } catch (err) {
     console.log(err);
   } finally {
