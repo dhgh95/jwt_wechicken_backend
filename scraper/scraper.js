@@ -16,4 +16,4 @@ const velog = {
   evaluateCallBack: velogEvalute,
 };
 
-getAllPosts(medium);
+getAllPosts(velog);

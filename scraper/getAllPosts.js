@@ -1,6 +1,11 @@
 const puppeteerInfiniteScroll = require("./puppeter-infinite-scroll");
 
-module.exports = async ({ url, endpoint, blogType, evaluateCallBack }) => {
+module.exports = async function ({
+  url,
+  endpoint,
+  blogType,
+  evaluateCallBack,
+}) {
   try {
     const browser = new puppeteerInfiniteScroll();
     await browser.start();

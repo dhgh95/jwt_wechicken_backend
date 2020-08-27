@@ -1,4 +1,4 @@
-module.exports = () => {
+module.exports = function () {
   const [_, featured, __, ...contents] = [
     ...document.querySelector(
       "#root > div > section > div:nth-child(3) > div:nth-child(1)"
