@@ -20,6 +20,7 @@ module.exports = (sequelize) => {
       },
       user_thumbnail: {
         type: DataTypes.STRING,
+        defaultValue: null,
       },
       recent_scraped: {
         type: DataTypes.STRING,
