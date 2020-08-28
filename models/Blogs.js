@@ -15,7 +15,7 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
       },
       link: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(800),
         allowNull: false,
       },
       user_id: {

@@ -9,6 +9,7 @@ module.exports = async function ({
   scraperEmitter,
 }) {
   try {
+    console.log("browser start");
     const browser = new puppeteerInfiniteScroll();
     scraperEmitter.once("close", async () => {
       await browser.close();
