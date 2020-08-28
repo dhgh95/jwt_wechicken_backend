@@ -9,18 +9,15 @@ module.exports = (sequelize) => {
         defaultValue: true,
         allowNull: false,
       },
-      user_id: {
-        type: DataTypes.INTEGER,
-      },
-      blog_id: {
-        type: DataTypes.INTEGER,
-      },
     },
     {
       freezeTableName: true,
       paranoid: true,
       underscored: true,
       timestamps: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
     }
   );
 };

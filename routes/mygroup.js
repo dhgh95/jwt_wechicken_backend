@@ -7,7 +7,7 @@ const {
 const { isAuth } = require("../middlewares");
 const router = express.Router();
 
-router.get("/", getPageDetails);
+router.get("/", isAuth, getPageDetails);
 router.post("/join", isAuth, joinGroup);
 router.post("/update", isAuth, updateGroup);
 

@@ -4,13 +4,13 @@ module.exports = (sequelize) => {
   return sequelize.define(
     "wecode_nth",
     {
-      title: {
-        type: DataTypes.STRING(45),
-      },
       nth: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
+      },
+      title: {
+        type: DataTypes.STRING(45),
       },
     },
     {
@@ -18,6 +18,9 @@ module.exports = (sequelize) => {
       paranoid: true,
       underscored: true,
       timestamps: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
     }
   );
 };

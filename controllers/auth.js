@@ -1,8 +1,6 @@
 const bcrypt = require("bcryptjs");
-const { errorGenerator } = require("../utils");
 const { googleAuth, createToken } = require("../services/auth");
 const { model } = require("../models");
-const velogEvaluate = require("../scraper/velogEvaluate");
 const getAllPosts = require("../scraper/getAllPosts");
 const velogEvalute = require("../scraper/velogEvaluate");
 const mediumEvalute = require("../scraper/mediumEvaluate");
@@ -22,11 +20,11 @@ const googleLogin = async (req, res, next) => {
     }
 
     if (user) {
-      const token = createToken(user.id, user.wecode_nth_id);
+      const token = createToken(user.id, user.wecode_nth);
       res.status(201).json({
         message: "SUCCESS",
         token,
-        thumbnail: user.user_thumbnail,
+        profile: user.user_thumbnail,
       });
     }
   } catch (err) {
@@ -85,6 +83,10 @@ const additional = async (req, res, next) => {
 
         await model["Blogs"].create(blog);
       }
+      const postTitle = allPosts[allPosts.length - 1].title;
+      const postDate = allPosts[allPosts.length - 1].date;
+      const recent_scraped = gmail + postTitle + postDate;
+      await model["Users"].update({ recent_scraped }, { where: { gmail_id } });
       console.log("DB => saved_post");
     });
 
