@@ -64,7 +64,14 @@ class puppeteerInfiniteScroll {
     this.canScroll = false;
   }
 
-  async open({ url, loadImages = true, endpoint, blogType, evaluateCallBack }) {
+  async open({
+    url,
+    loadImages = true,
+    endpoint,
+    blogType,
+    evaluateCallBack,
+    scraperEmitter,
+  }) {
     try {
       this.page = await this.browser.newPage();
       this.page.setViewport({ width: 1280, height: 926 });
@@ -85,7 +92,8 @@ class puppeteerInfiniteScroll {
           if (isEnd && !this.isScraped) {
             let allPosts = await this.extract(evaluateCallBack);
             allPosts = refinePostsForDatabase(allPosts, blogType);
-            console.log(allPosts);
+            scraperEmitter.emit("done", allPosts);
+            scraperEmitter.emit("close");
           }
         }
       });
