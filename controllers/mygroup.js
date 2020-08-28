@@ -1,10 +1,13 @@
-const { errorGenerator, getRandomIntInclusive, shuffleArray } = require(
-  "../utils/",
-);
+const {
+  errorGenerator,
+  getRandomIntInclusive,
+  shuffleArray,
+} = require("../utils/");
 const faker = require("faker");
 const mediumPosts = require("../scraper/json/medium.json");
 const velogPosts = require("../scraper/json/velog.json");
 const days = require("../scraper/days");
+const { model } = require("../models/");
 
 const getPageDetails = async (req, res, next) => {
   try {
@@ -51,4 +54,33 @@ const getPageDetails = async (req, res, next) => {
   }
 };
 
-module.exports = { getPageDetails };
+const joinGroup = async (req, res, next) => {
+  try {
+    const { id } = rep.user;
+    await model["Users"].update({ is_group_joined: true }, { where: { id } });
+
+    res.status(200).json({ message: "JOIN" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateGroup = async (req, res, next) => {
+  try {
+    const { wecode_nth } = req.user;
+    const users = await model["Users"].findAll({
+      where: { wecode_nth },
+    });
+    const links = users.map((user) => {
+      user.blog_address;
+    });
+
+    // links로 크롤링 시작
+
+    res.status(200).json({ message: "SUCCESS" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getPageDetails, joinGroup, updateGroup };
