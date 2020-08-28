@@ -14,7 +14,6 @@ const refineMediumPosts = (posts) => {
     return {
       ...post,
       date: changeDateFormat(post.date),
-      type: "medium",
     };
   });
 };
@@ -43,7 +42,7 @@ const refineVelogPosts = (posts) => {
   };
 
   return posts.map((post) => {
-    return { ...post, date: refineDate(post.date), type: "velog" };
+    return { ...post, date: refineDate(post.date) };
   });
 };
 

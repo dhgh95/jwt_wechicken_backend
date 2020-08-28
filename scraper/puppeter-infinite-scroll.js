@@ -11,7 +11,9 @@ class puppeteerInfiniteScroll {
   }
 
   async start(opts) {
-    const lauchOpts = opts ? opts : { headless: false, devtools: false };
+    const lauchOpts = opts
+      ? opts
+      : { headless: true, args: ["--no-sandbox"], devtools: false };
     this.browser = await puppeteer.launch(lauchOpts);
   }
 

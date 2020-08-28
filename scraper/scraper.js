@@ -4,7 +4,7 @@ const velogEvalute = require("./velogEvaluate");
 const events = require("events");
 
 const scraperEmitter = new events.EventEmitter();
-scraperEmitter.once("done", (allPosts) => {
+scraperEmitter.once("done", async (allPosts) => {
   // allPosts to fix
   console.log(allPosts);
 });
@@ -25,4 +25,4 @@ const velog = {
   scraperEmitter,
 };
 
-getAllPosts(velog);
+getAllPosts(medium);

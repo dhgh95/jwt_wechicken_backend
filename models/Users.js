@@ -8,15 +8,18 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING(20),
       },
       gmail_id: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
       gmail: {
-        type: DataTypes.STRING(40),
+        type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
       blog_address: {
-        type: DataTypes.STRING(30),
+        type: DataTypes.STRING,
+        unique: true,
       },
       user_thumbnail: {
         type: DataTypes.STRING,
@@ -24,6 +27,7 @@ module.exports = (sequelize) => {
       },
       recent_scraped: {
         type: DataTypes.STRING,
+        unique: true,
       },
       admin: {
         type: DataTypes.BOOLEAN,
