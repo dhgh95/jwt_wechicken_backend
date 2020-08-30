@@ -4,3 +4,5 @@ module.exports = (array) => {
     [array[i], array[j]] = [array[j], array[i]];
   }
 };
+
+//곧 필요없을거같은데..?

@@ -18,20 +18,15 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING(800),
         allowNull: false,
       },
-      user_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      date_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
     },
     {
       freezeTableName: true,
       paranoid: true,
       underscored: true,
       timestamps: true,
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      deletedAt: "deleted_at",
     }
   );
 };

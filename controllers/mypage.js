@@ -62,4 +62,8 @@ const deleteMyProfile = async (req, res, next) => {
   }
 };
 
-module.exports = { getMyPage, modifyMyProfile, deleteMyProfile };
+module.exports = {
+  getMyPage,
+  modifyMyProfile,
+  deleteMyProfile,
+};

@@ -39,13 +39,7 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: false,
       },
-      wecode_nth: {
-        type: DataTypes.INTEGER,
-      },
-      blog_type_id: {
-        type: DataTypes.INTEGER,
-      },
-      created_at: {
+      /* created_at: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
@@ -53,7 +47,7 @@ module.exports = (sequelize) => {
       updated_at: {
         type: DataTypes.DATE,
         allowNull: true,
-      },
+      }, */
     },
     {
       freezeTableName: true,
