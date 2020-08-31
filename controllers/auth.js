@@ -59,7 +59,7 @@ const additional = async (req, res, next) => {
       blog_address,
       blog_type_id: id,
       wecode_nth,
-      user_thumbnail: req.file ? req.file.path : user_thumbnail,
+      user_thumbnail: req.file ? req.file.location : user_thumbnail,
       gmail_id,
       gmail,
     };
@@ -67,6 +67,7 @@ const additional = async (req, res, next) => {
     await model["Users"].create(additionalInfo);
     const user = await model["Users"].findOne({ where: { gmail_id } });
     const token = createToken(user.id, user.wecode_nth);
+    const profile = user.user_thumbnail;
 
     scraperEmitter.once("done", async (allPosts) => {
       for (post of allPosts) {
@@ -83,10 +84,6 @@ const additional = async (req, res, next) => {
 
         await model["Blogs"].create(blog);
       }
-      const postTitle = allPosts[allPosts.length - 1].title;
-      const postDate = allPosts[allPosts.length - 1].date;
-      const recent_scraped = gmail + postTitle + postDate;
-      await model["Users"].update({ recent_scraped }, { where: { gmail_id } });
       console.log("DB => saved_post");
     });
 
@@ -101,7 +98,7 @@ const additional = async (req, res, next) => {
       scraperEmitter,
     });
 
-    res.status(201).json({ message: "User created!!!", token });
+    res.status(201).json({ message: "User created!!!", token, profile });
   } catch (err) {
     next(err);
   }

@@ -30,7 +30,7 @@ const modifyMyProfile = async (req, res, next) => {
     const { blog_address } = req.body;
 
     const modifyProfile = {
-      user_thumbnail: req.file?.path,
+      user_thumbnail: req.file?.location,
       blog_address,
     };
 
