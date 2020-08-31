@@ -59,7 +59,7 @@ const additional = async (req, res, next) => {
       blog_address,
       blog_type_id: id,
       wecode_nth,
-      user_thumbnail: req.file ? req.file.path : user_thumbnail,
+      user_thumbnail: req.file ? req.file.location : user_thumbnail,
       gmail_id,
       gmail,
     };
@@ -84,10 +84,6 @@ const additional = async (req, res, next) => {
 
         await model["Blogs"].create(blog);
       }
-      /* const postTitle = allPosts[0].title;
-      const postDate = allPosts[0].date;
-      const recent_scraped = user.id + postTitle + postDate;
-      await model["Users"].update({ recent_scraped }, { where: { gmail_id } }); */
       console.log("DB => saved_post");
     });
 

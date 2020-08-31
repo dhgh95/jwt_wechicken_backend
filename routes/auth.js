@@ -1,18 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "images");
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-const upload = multer({ storage });
-const { additional, googleLogin } = require("../controllers/auth");
 
-router.post("/additional", upload.single("user_thumbnail"), additional);
+const { additional, googleLogin } = require("../controllers/auth");
+const upload = require("../services/upload");
+const singleUpload = upload.single("user_thumbnail");
+
+router.post("/additional", singleUpload, additional);
 router.post("/login/google", googleLogin);
 
 module.exports = router;
