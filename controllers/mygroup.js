@@ -31,12 +31,12 @@ const getPageDetails = async (req, res, next) => {
       });
       const strChangeDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
       for (let basicPost of posts) {
-        let { date } = await model["Dates"].findOne({
+        const { date } = await model["Dates"].findOne({
           where: { id: basicPost.date_id },
           attributes: ["date"],
         });
-        let day = strChangeDay[moment(date.replace(/\./g, "")).day()];
-        let post = {
+        const day = strChangeDay[moment(date.replace(/\./g, "")).day()];
+        const post = {
           title: basicPost.title,
           subtitle: basicPost.subtitle,
           date,
