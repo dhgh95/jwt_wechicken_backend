@@ -9,6 +9,6 @@ const router = express.Router();
 
 router.get("/", isAuth, getPageDetails);
 router.post("/join", isAuth, joinGroup);
-router.post("/update", isAuth, updateGroup);
+router.post("/update", isAuth, updateGroup, getPageDetails);
 
 module.exports = router;

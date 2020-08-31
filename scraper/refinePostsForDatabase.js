@@ -27,6 +27,9 @@ const refineVelogPosts = (posts) => {
       }`;
     }
     const currentDate = moment();
+    if (originalDate.includes(`방금 전`)) {
+      return currentDate.format("YYYY.MM.DD");
+    }
     if (originalDate.includes(`일 전`)) {
       const beforeDay = originalDate.match(/[0-9]/gi)[0];
       return currentDate.subtract(beforeDay, "d").format("YYYY.MM.DD");
