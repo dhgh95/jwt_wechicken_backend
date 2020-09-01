@@ -5,10 +5,41 @@ const {
   shuffleArray,
 } = require("../utils/");
 const { model } = require("../models/");
+const getVelogRecentPostsScraper = require("../scraper/getVelogRecentPostsScraper");
+const getMediumRecentPostsScraper = require("../scraper/getMediumRecentPostsScraper");
 
 const getPageDetails = async (req, res, next) => {
   try {
-    const { wecode_nth, is_group_joined } = req.user;
+    const { gmail, wecode_nth, is_group_joined } = req.user;
+    const joinUsers = await model["Users"].findAll({
+      where: { wecode_nth, is_group_joined: true },
+      attributes: [
+        "gmail",
+        ["user_name", "name"],
+        ["user_thumbnail", "profile"],
+      ],
+    });
+
+    let myProfile = {};
+    let users = [];
+    joinUsers.forEach((user) => {
+      if (user.gmail === gmail) {
+        myProfile = user;
+      }
+      if (user.gmail !== gmail) {
+        users = [...users, user];
+      }
+    });
+
+    const posts = await model["Blogs"].findAll({
+      attributes: ["title", "subtitle", "thumbnail", "link", "date_id"],
+      include: {
+        model: model["Users"],
+        where: { wecode_nth, is_group_joined: true },
+        attributes: ["user_name", "user_thumbnail"],
+        include: { model: model["Blog_type"], attributes: ["type"] },
+      },
+    });
     const by_days = {
       MON: [],
       TUE: [],
@@ -18,16 +49,11 @@ const getPageDetails = async (req, res, next) => {
       SAT: [],
       SUN: [],
     };
-
-    if (is_group_joined) {
-      const posts = await model["Blogs"].findAll({
-        attributes: ["title", "subtitle", "thumbnail", "link", "date_id"],
-        include: {
-          model: model["Users"],
-          where: { wecode_nth },
-          attributes: ["user_name", "user_thumbnail"],
-          include: { model: model["Blog_type"], attributes: ["type"] },
-        },
+    const strChangeDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    for (let basicPost of posts) {
+      let { date } = await model["Dates"].findOne({
+        where: { id: basicPost.date_id },
+        attributes: ["date"],
       });
       const strChangeDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
       for (let basicPost of posts) {
@@ -50,7 +76,9 @@ const getPageDetails = async (req, res, next) => {
       }
     }
 
-    res.status(200).json({ message: "GROUP", is_group_joined, by_days });
+    res
+      .status(200)
+      .json({ message: "GROUP", is_group_joined, by_days, myProfile, users });
   } catch (err) {
     next(err);
   }
@@ -72,14 +100,42 @@ const updateGroup = async (req, res, next) => {
     const { wecode_nth } = req.user;
     const users = await model["Users"].findAll({
       where: { wecode_nth },
+      attributes: ["id", "blog_address"],
+      include: { model: model["Blog_type"], attributes: ["type"] },
     });
-    const links = users.map((user) => {
-      user.blog_address;
+    const usersId = users.map(({ id }) => id);
+    const postsPromise = users.map(({ blog_address, blog_type: { type } }) =>
+      type === "velog"
+        ? getVelogRecentPostsScraper({ url: blog_address })
+        : getMediumRecentPostsScraper({ url: blog_address })
+    );
+    const posts = await Promise.all(postsPromise);
+    const usersToPosts = usersId.map((userId, index) => {
+      return { userId, posts: posts[index] };
     });
+    for (let { userId, posts } of usersToPosts) {
+      for (let post of posts) {
+        const [date] = await model["Dates"].findOrCreate({
+          where: { date: post.date },
+          defaults: { date: post.date },
+        });
 
-    // links로 크롤링 시작
+        const blog = {
+          title: post.title,
+          subtitle: post.subtitle,
+          thumbnail: post.thumbnail,
+          link: post.link,
+          date_id: date.id,
+          user_id: userId,
+        };
 
-    res.status(200).json({ message: "UPDATE SCRAPER" });
+        await model["Blogs"].findOrCreate({
+          where: { title: post.title },
+          defaults: blog,
+        });
+      }
+    }
+    next();
   } catch (err) {
     next(err);
   }

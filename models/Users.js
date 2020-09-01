@@ -10,16 +10,16 @@ module.exports = (sequelize) => {
       gmail_id: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: "gmail_id",
       },
       gmail: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: "gmail",
       },
       blog_address: {
         type: DataTypes.STRING,
-        unique: true,
+        unique: "blog_address",
       },
       user_thumbnail: {
         type: DataTypes.STRING,
@@ -27,7 +27,7 @@ module.exports = (sequelize) => {
       },
       recent_scraped: {
         type: DataTypes.STRING,
-        unique: true,
+        unique: "recent_scraped",
       },
       admin: {
         type: DataTypes.BOOLEAN,
@@ -39,15 +39,6 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: false,
       },
-      /* created_at: {
-        type: DataTypes.DATE,
-        allowNull: false,
-        defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
-      },
-      updated_at: {
-        type: DataTypes.DATE,
-        allowNull: true,
-      }, */
     },
     {
       freezeTableName: true,
