@@ -1,4 +1,4 @@
-module.exports = function () {
+module.exports = async () => {
   const [_, featured, __, ...contents] = [
     ...document.querySelector(
       "#root > div > section > div:nth-child(3) > div:nth-child(1)"
@@ -8,16 +8,18 @@ module.exports = function () {
   const posts = [];
 
   for (content of [featured, ...contents]) {
-    const thumbnail = content.querySelector(
-      "section > figure > div > div > div > div > img"
-    )?.src;
+    const thumbnail = content
+      .querySelector("section > figure > div > div > div > div > img")
+      ?.src.replace("30", "500");
 
     const title = content.querySelector("h1")?.innerText;
     const subtitle = content.querySelector("h2")?.innerText;
-    const date = content.querySelector(
+    const link = content.querySelector("div > div:nth-child(2) > a")?.href;
+
+    let date = content.querySelector(
       "div > div > div > div > div > span > span > div > a"
     )?.innerText;
-    const link = content.querySelector("div > div:nth-child(2) > a")?.href;
+    date = await changeDateFormat(date);
 
     const result = title && {
       title,

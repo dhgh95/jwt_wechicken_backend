@@ -1,4 +1,3 @@
-const { errorGenerator } = require("../utils");
 const { model } = require("../models");
 
 const getMyPage = async (req, res, next) => {
@@ -9,6 +8,7 @@ const getMyPage = async (req, res, next) => {
       gmail,
       blog_address,
       wecode_nth,
+      is_group_joined,
     } = req.user;
 
     const mypage = {
@@ -17,6 +17,7 @@ const getMyPage = async (req, res, next) => {
       gmail,
       blog_address,
       wecode_nth,
+      is_group_joined,
     };
 
     res.status(200).json({ message: "SUCCESS", mypage });
@@ -28,10 +29,12 @@ const getMyPage = async (req, res, next) => {
 const modifyMyProfile = async (req, res, next) => {
   try {
     const { blog_address } = req.body;
+    const { leave } = req.query;
 
     const modifyProfile = {
       user_thumbnail: req.file?.location,
       blog_address,
+      is_group_joined: leave === "group" && false,
     };
 
     const { id } = req.user;
@@ -50,10 +53,6 @@ const deleteMyProfile = async (req, res, next) => {
 
     if (deleted === "user_thumbnail") {
       await model["Users"].update({ user_thumbnail: null }, { where: { id } });
-    }
-
-    if (deleted === "user") {
-      await model["Users"].destroy({ where: { id }, force: true });
     }
 
     res.status(200).json({ message: "DELETE" });
