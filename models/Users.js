@@ -25,10 +25,6 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         defaultValue: null,
       },
-      recent_scraped: {
-        type: DataTypes.STRING,
-        unique: "recent_scraped",
-      },
       admin: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

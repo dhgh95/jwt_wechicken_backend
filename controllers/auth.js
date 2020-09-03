@@ -18,10 +18,15 @@ const googleLogin = async (req, res, next) => {
 
     if (user) {
       const token = createToken(user.id, user.wecode_nth);
+      const { status } = await model["Wecode_nth"].findOne({
+        where: { nth: user.wecode_nth },
+        attributes: ["status"],
+      });
       res.status(201).json({
         message: "SUCCESS",
         token,
         profile: user.user_thumbnail,
+        myGroupStatus: status,
       });
     }
   } catch (err) {
@@ -64,8 +69,13 @@ const additional = async (req, res, next) => {
     };
 
     await model["Users"].create(additionalInfo);
+
     const user = await model["Users"].findOne({ where: { gmail_id } });
     const token = createToken(user.id, user.wecode_nth);
+    const { status } = await model["Wecode_nth"].findOne({
+      where: { nth: wecode_nth },
+      attributes: ["status"],
+    });
     const profile = user.user_thumbnail;
 
     scraperEmitter.once("done", async (allPosts) => {
@@ -92,7 +102,12 @@ const additional = async (req, res, next) => {
       scraperEmitter,
     });
 
-    res.status(201).json({ message: "User created!!!", token, profile });
+    res.status(201).json({
+      message: "User created!!!",
+      token,
+      profile,
+      myGroupStatus: status,
+    });
   } catch (err) {
     next(err);
   }

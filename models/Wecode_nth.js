@@ -12,6 +12,16 @@ module.exports = (sequelize) => {
       title: {
         type: DataTypes.STRING(45),
       },
+      status: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+      count: {
+        type: DataTypes.INTEGER,
+      },
+      penalty: {
+        type: DataTypes.INTEGER,
+      },
     },
     {
       freezeTableName: true,
