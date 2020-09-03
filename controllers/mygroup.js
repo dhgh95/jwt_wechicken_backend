@@ -14,6 +14,12 @@ const getPageDetails = async (req, res, next) => {
       ],
     });
 
+    const myGroup = await model["Wecode_nth"].findOne({
+      where: {
+        nth: wecode_nth,
+      },
+      attributes: ["title", "count", "penalty"],
+    });
     let myProfile = {};
     let users = [];
     joinUsers.forEach((user) => {
@@ -64,9 +70,14 @@ const getPageDetails = async (req, res, next) => {
       by_days[day] = [...by_days[day], post];
     }
 
-    res
-      .status(200)
-      .json({ message: "GROUP", is_group_joined, by_days, myProfile, users });
+    res.status(200).json({
+      message: "GROUP",
+      is_group_joined,
+      by_days,
+      myProfile,
+      users,
+      myGroup,
+    });
   } catch (err) {
     next(err);
   }
@@ -126,8 +137,32 @@ const updateGroup = async (req, res, next) => {
   }
 };
 
+const createMyGroup = async (req, res, next) => {
+  try {
+    const { wecode_nth, id } = req.user;
+    const { title, count, penalty } = req.body;
+
+    const createMyGroup = {
+      user_id: id,
+      title,
+      count: Number(count),
+      penalty: Number(penalty),
+      status: true,
+    };
+
+    await model["Wecode_nth"].update(createMyGroup, {
+      where: { nth: wecode_nth },
+    });
+
+    res.status(200).json({ message: "CREATE GROUP" });
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getPageDetails,
   joinGroup,
   updateGroup,
+  createMyGroup,
 };

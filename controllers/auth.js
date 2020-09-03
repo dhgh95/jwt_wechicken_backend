@@ -27,6 +27,7 @@ const googleLogin = async (req, res, next) => {
         token,
         profile: user.user_thumbnail,
         myGroupStatus: status,
+        nth: user.wecode_nth,
       });
     }
   } catch (err) {
@@ -72,11 +73,11 @@ const additional = async (req, res, next) => {
 
     const user = await model["Users"].findOne({ where: { gmail_id } });
     const token = createToken(user.id, user.wecode_nth);
+    const profile = user.user_thumbnail;
     const { status } = await model["Wecode_nth"].findOne({
-      where: { nth: wecode_nth },
+      where: { nth: user.wecode_nth },
       attributes: ["status"],
     });
-    const profile = user.user_thumbnail;
 
     scraperEmitter.once("done", async (allPosts) => {
       for (post of allPosts) {
@@ -107,6 +108,7 @@ const additional = async (req, res, next) => {
       token,
       profile,
       myGroupStatus: status,
+      nth: user.wecode_nth,
     });
   } catch (err) {
     next(err);

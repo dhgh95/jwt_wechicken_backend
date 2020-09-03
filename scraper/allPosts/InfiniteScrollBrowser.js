@@ -30,7 +30,7 @@ class InfiniteScrollBrowser {
 
     if (blogType === "velog") {
       const postsCount = await this.page.$eval(
-        "#root > div > div > div:nth-child(4)  > div > div > div > div > ul > li > span",
+        "#root > div > div > div:nth-child(4) > div > div > div > div > ul > li > span",
         (postsCountTag) => postsCountTag.innerText
       );
 
