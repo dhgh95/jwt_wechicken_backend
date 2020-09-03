@@ -1,7 +1,8 @@
 const puppeteer = require("puppeteer");
-const refinePostsForDatabase = require("./refinePostsForDatabase");
+const mediumChangeDateFormat = require("../utils/mediumChangeDateFormat");
+const velogChagneDateFormat = require("../utils/velogChangeDateFormat");
 
-class puppeteerInfiniteScroll {
+class InfiniteScrollBrowser {
   constructor() {
     this.browser = null;
     this.page = null;
@@ -91,9 +92,17 @@ class puppeteerInfiniteScroll {
 
         if (resUrl.includes(endpoint) && !this.isEndReached) {
           const isEnd = await this.scrollDown(blogType);
+
           if (isEnd && !this.isScraped) {
+            await this.page.exposeFunction(
+              "changeDateFormat",
+              blogType === "medium"
+                ? mediumChangeDateFormat
+                : velogChagneDateFormat
+            );
+
             let allPosts = await this.extract(evaluateCallBack);
-            allPosts = refinePostsForDatabase(allPosts, blogType);
+
             scraperEmitter.emit("done", allPosts);
             scraperEmitter.emit("close");
           }
@@ -126,9 +135,9 @@ class puppeteerInfiniteScroll {
     }
   }
 
-  close() {
-    this.browser.close();
+  async close() {
+    await this.browser.close();
   }
 }
 
-module.exports = puppeteerInfiniteScroll;
+module.exports = InfiniteScrollBrowser;

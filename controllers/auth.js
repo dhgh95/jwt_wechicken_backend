@@ -1,9 +1,6 @@
-const bcrypt = require("bcryptjs");
 const { googleAuth, createToken } = require("../services/auth");
 const { model } = require("../models");
-const getAllPosts = require("../scraper/getAllPosts");
-const velogEvalute = require("../scraper/velogEvaluate");
-const mediumEvalute = require("../scraper/mediumEvaluate");
+const { getAllPosts } = require("../scraper");
 const events = require("events");
 const scraperEmitter = new events.EventEmitter();
 
@@ -41,6 +38,7 @@ const additional = async (req, res, next) => {
       user_thumbnail,
       gmail_id,
       gmail,
+      is_group_joined,
     } = req.body;
 
     await model["Wecode_nth"].findOrCreate({
@@ -62,6 +60,7 @@ const additional = async (req, res, next) => {
       user_thumbnail: req.file ? req.file.location : user_thumbnail,
       gmail_id,
       gmail,
+      is_group_joined,
     };
 
     await model["Users"].create(additionalInfo);
@@ -89,12 +88,7 @@ const additional = async (req, res, next) => {
 
     getAllPosts({
       url: blog_address,
-      endpoint:
-        blog_type === "velog"
-          ? "https://v2.velog.io/graphql"
-          : "https://medium.com/_/batch",
       blogType: blog_type,
-      evaluateCallBack: blog_type === "velog" ? velogEvalute : mediumEvalute,
       scraperEmitter,
     });
 
