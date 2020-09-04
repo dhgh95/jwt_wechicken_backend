@@ -54,16 +54,23 @@ model["Blogs"].belongsTo(model["Dates"], {
 
 model["Users"].belongsToMany(model["Blogs"], {
   through: "likes",
+  foreignKey: "user_id",
+  as: "like",
 });
 model["Blogs"].belongsToMany(model["Users"], {
   through: "likes",
+  foreignKey: "blog_id",
+  as: "like",
 });
 
 model["Users"].belongsToMany(model["Blogs"], {
-  through: "bookmars",
+  through: "bookmarks",
+  foreignKey: "user_id",
+  as: "bookmark",
 });
 model["Blogs"].belongsToMany(model["Users"], {
-  through: "bookmars",
+  through: "bookmarks",
+  foreignKey: "blog_id",
+  as: "bookmark",
 });
-
 module.exports = { model, sequelize };
