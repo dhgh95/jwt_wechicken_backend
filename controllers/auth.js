@@ -18,9 +18,9 @@ const googleLogin = async (req, res, next) => {
 
     if (user) {
       const token = createToken(user.id, user.wecode_nth);
-      const { status } = await model["Wecode_nth"].findOne({
+      const { status, user_id } = await model["Wecode_nth"].findOne({
         where: { nth: user.wecode_nth },
-        attributes: ["status"],
+        attributes: ["status", "user_id"],
       });
       res.status(201).json({
         message: "SUCCESS",
@@ -28,6 +28,7 @@ const googleLogin = async (req, res, next) => {
         profile: user.user_thumbnail,
         myGroupStatus: status,
         nth: user.wecode_nth,
+        master: user.id === user_id ? true : false,
       });
     }
   } catch (err) {

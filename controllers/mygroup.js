@@ -137,7 +137,7 @@ const updateGroup = async (req, res, next) => {
   }
 };
 
-const createMyGroup = async (req, res, next) => {
+const createOrModifyMyGroup = async (req, res, next) => {
   try {
     const { wecode_nth, id } = req.user;
     const { title, count, penalty } = req.body;
@@ -164,5 +164,5 @@ module.exports = {
   getPageDetails,
   joinGroup,
   updateGroup,
-  createMyGroup,
+  createOrModifyMyGroup,
 };

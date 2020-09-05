@@ -40,7 +40,7 @@ const modifyMyProfile = async (req, res, next) => {
     const { id } = req.user;
     await model["Users"].update(modifyProfile, { where: { id } });
 
-    res.status(200).json({ message: "MODIFY" });
+    res.status(200).json({ message: "MODIFY", profile: req.file?.location });
   } catch (err) {
     next(err);
   }
