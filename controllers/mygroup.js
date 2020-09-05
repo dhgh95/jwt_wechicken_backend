@@ -1,3 +1,5 @@
+const Sequelize = require("sequelize");
+const Op = Sequelize.Op;
 const moment = require("moment");
 const { model } = require("../models/");
 const { getRecentPosts } = require("../scraper");
@@ -31,14 +33,40 @@ const getPageDetails = async (req, res, next) => {
       }
     });
 
+    const weekFistAndLastDay = {
+      1: { last: 6 },
+      2: { first: 1, last: 5 },
+      3: { first: 2, last: 4 },
+      4: { first: 3, last: 3 },
+      5: { first: 4, last: 2 },
+      6: { first: 5, last: 1 },
+      0: { first: 6 },
+    };
+    let week = weekFistAndLastDay[moment().day()];
+    week = {
+      first: moment().subtract(week.first, "d").format("YYYY.MM.DD"),
+      last: moment().add(week.last, "d").format("YYYY.MM.DD"),
+    };
+
     const posts = await model["Blogs"].findAll({
-      attributes: ["title", "subtitle", "thumbnail", "link", "date_id"],
-      include: {
-        model: model["Users"],
-        where: { wecode_nth, is_group_joined: true },
-        attributes: ["user_name", "user_thumbnail"],
-        include: { model: model["Blog_type"], attributes: ["type"] },
-      },
+      attributes: ["title", "subtitle", "thumbnail", "link", "id"],
+      include: [
+        {
+          model: model["Users"],
+          where: { wecode_nth, is_group_joined: true },
+          attributes: ["user_name", "user_thumbnail"],
+          include: { model: model["Blog_type"], attributes: ["type"] },
+        },
+        {
+          model: model["Dates"],
+          where: {
+            date: {
+              [Op.and]: { [Op.gte]: week.first, [Op.lte]: week.last },
+            },
+          },
+          attributes: ["date"],
+        },
+      ],
     });
     const by_days = {
       MON: [],
@@ -52,15 +80,13 @@ const getPageDetails = async (req, res, next) => {
 
     const strChangeDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
     for (let basicPost of posts) {
-      const { date } = await model["Dates"].findOne({
-        where: { id: basicPost.date_id },
-        attributes: ["date"],
-      });
-      const day = strChangeDay[moment(date.replace(/\./g, "")).day()];
+      const day =
+        strChangeDay[moment(basicPost.date.date.replace(/\./g, "")).day()];
       const post = {
+        id: basicPost.id,
         title: basicPost.title,
         subtitle: basicPost.subtitle,
-        date,
+        date: basicPost.date.date,
         link: basicPost.link,
         thumbnail: basicPost.thumbnail,
         user_name: basicPost.user.user_name,
@@ -78,6 +104,86 @@ const getPageDetails = async (req, res, next) => {
       users,
       myGroup,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getCalendar = async (req, res, next) => {
+  try {
+    const { wecode_nth } = req.user;
+    const { seleteDate } = req.params;
+
+    const weekFistAndLastDay = {
+      1: { last: 6 },
+      2: { first: 1, last: 5 },
+      3: { first: 2, last: 4 },
+      4: { first: 3, last: 3 },
+      5: { first: 4, last: 2 },
+      6: { first: 5, last: 1 },
+      0: { first: 6 },
+    };
+    let week =
+      weekFistAndLastDay[moment(seleteDate.match(/[0-9]+/g).join("")).day()];
+
+    week = {
+      first: moment(seleteDate.match(/[0-9]+/g).join(""))
+        .subtract(week.first, "d")
+        .format("YYYY.MM.DD"),
+      last: moment(seleteDate.match(/[0-9]+/g).join(""))
+        .add(week.last, "d")
+        .format("YYYY.MM.DD"),
+    };
+
+    const posts = await model["Blogs"].findAll({
+      attributes: ["title", "subtitle", "thumbnail", "link", "id"],
+      include: [
+        {
+          model: model["Users"],
+          where: { wecode_nth, is_group_joined: true },
+          attributes: ["user_name", "user_thumbnail"],
+          include: { model: model["Blog_type"], attributes: ["type"] },
+        },
+        {
+          model: model["Dates"],
+          where: {
+            date: {
+              [Op.and]: { [Op.gte]: week.first, [Op.lte]: week.last },
+            },
+          },
+          attributes: ["date"],
+        },
+      ],
+    });
+    const by_days = {
+      MON: [],
+      TUE: [],
+      WED: [],
+      THU: [],
+      FRI: [],
+      SAT: [],
+      SUN: [],
+    };
+
+    const strChangeDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+    for (let basicPost of posts) {
+      const day =
+        strChangeDay[moment(basicPost.date.date.replace(/\./g, "")).day()];
+      const post = {
+        id: basicPost.id,
+        title: basicPost.title,
+        subtitle: basicPost.subtitle,
+        date: basicPost.date.date,
+        link: basicPost.link,
+        thumbnail: basicPost.thumbnail,
+        user_name: basicPost.user.user_name,
+        user_profile: basicPost.user.user_thumbnail,
+        type: basicPost.user.blog_type.type,
+      };
+      by_days[day] = [...by_days[day], post];
+    }
+
+    res.status(200).json({ message: "CALENDAR", by_days });
   } catch (err) {
     next(err);
   }
@@ -165,4 +271,5 @@ module.exports = {
   joinGroup,
   updateGroup,
   createOrModifyMyGroup,
+  getCalendar,
 };
