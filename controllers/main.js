@@ -3,22 +3,28 @@ const { model } = require("../models");
 const getMainPosts = async (req, res, next) => {
   try {
     const user = req.user;
+    const { size, page } = req.query;
+
     const allPosts = await model["Blogs"].findAll({
+      offset: Number(size) * Number(page),
+      limit: Number(size),
       attributes: ["title", "subtitle", "thumbnail", "link", "date_id", "id"],
-      include: {
-        model: model["Users"],
-        attributes: ["user_name", "user_thumbnail", "wecode_nth"],
-        include: { model: model["Blog_type"], attributes: ["type"] },
-      },
+      include: [
+        {
+          model: model["Users"],
+          attributes: ["user_name", "user_thumbnail", "wecode_nth"],
+          include: { model: model["Blog_type"], attributes: ["type"] },
+        },
+        {
+          model: model["Dates"],
+          attributes: ["date"],
+        },
+      ],
     });
 
     let posts = [];
 
     for (basicPost of allPosts) {
-      const { date } = await model["Dates"].findOne({
-        where: { id: basicPost.date_id },
-        attributes: ["date"],
-      });
       let isLikedPost = {};
       let isBookMarkedPost = {};
       if (user) {
@@ -34,7 +40,7 @@ const getMainPosts = async (req, res, next) => {
       const post = {
         title: basicPost.title,
         subtitle: basicPost.subtitle,
-        date,
+        date: basicPost.date.date,
         link: basicPost.link,
         thumbnail: basicPost.thumbnail,
         user_name: basicPost.user.user_name,
