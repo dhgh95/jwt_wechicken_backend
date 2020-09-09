@@ -7,6 +7,14 @@ const { getRecentPosts } = require("../scraper");
 const getPageDetails = async (req, res, next) => {
   try {
     const { gmail, wecode_nth, is_group_joined } = req.user;
+
+    const myGroup = await model["Wecode_nth"].findOne({
+      where: {
+        nth: wecode_nth,
+      },
+      attributes: ["title", "count", "penalty"],
+    });
+
     const joinUsers = await model["Users"].findAll({
       where: { wecode_nth, is_group_joined: true },
       attributes: [
@@ -16,12 +24,6 @@ const getPageDetails = async (req, res, next) => {
       ],
     });
 
-    const myGroup = await model["Wecode_nth"].findOne({
-      where: {
-        nth: wecode_nth,
-      },
-      attributes: ["title", "count", "penalty"],
-    });
     let myProfile = {};
     let users = [];
     joinUsers.forEach((user) => {
@@ -31,6 +33,24 @@ const getPageDetails = async (req, res, next) => {
       if (user.gmail !== gmail) {
         users = [...users, user];
       }
+    });
+
+    let Ranks = await model["Blogs"].findAll({
+      group: ["user_id"],
+      attributes: [[Sequelize.fn("COUNT", "user_id"), "user_posts"]],
+      order: Sequelize.literal("user_posts DESC"),
+      limit: 3,
+      include: {
+        model: model["Users"],
+        where: { wecode_nth: 10 },
+        attributes: ["user_name", "user_thumbnail"],
+      },
+    });
+    Ranks = Ranks.map((rank) => {
+      return {
+        user_name: rank.user.user_name,
+        user_profile: rank.user.user_thumbnail,
+      };
     });
 
     const weekFistAndLastDay = {
@@ -54,7 +74,7 @@ const getPageDetails = async (req, res, next) => {
         {
           model: model["Users"],
           where: { wecode_nth, is_group_joined: true },
-          attributes: ["user_name", "user_thumbnail"],
+          attributes: ["user_name", "user_thumbnail", "gmail"],
           include: { model: model["Blog_type"], attributes: ["type"] },
         },
         {
@@ -77,6 +97,7 @@ const getPageDetails = async (req, res, next) => {
       SAT: [],
       SUN: [],
     };
+    let userPostsCounting = {};
 
     const strChangeDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
     for (let basicPost of posts) {
@@ -94,6 +115,9 @@ const getPageDetails = async (req, res, next) => {
         type: basicPost.user.blog_type.type,
       };
       by_days[day] = [...by_days[day], post];
+      userPostsCounting[basicPost.user.gmail]
+        ? (userPostsCounting[basicPost.user.gmail] += 1)
+        : (userPostsCounting[basicPost.user.gmail] = 1);
     }
 
     res.status(200).json({
@@ -103,6 +127,8 @@ const getPageDetails = async (req, res, next) => {
       myProfile,
       users,
       myGroup,
+      userPostsCounting,
+      Ranks,
     });
   } catch (err) {
     next(err);
