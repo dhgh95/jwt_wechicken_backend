@@ -1,31 +1,31 @@
 const { model } = require("../models");
 
-const getLikedOrBookmarkPosts = async ({ userId, selectType }) => {
+const getLikedOrBookmarkPosts = async ({ userId, selectModel }) => {
   const likedOrBookmarkedPosts = await model["Users"].findOne({
     where: { id: userId },
     attributes: ["user_name"],
     include: {
-      model: model["Blogs"],
-      as: selectType,
-      attributes: ["title", "subtitle", "thumbnail", "link", "id"],
-      include: [
-        { model: model["Dates"], attributes: ["date"] },
-        {
-          model: model["Users"],
-          attributes: ["wecode_nth", "user_name", "user_thumbnail"],
-          include: { model: model["Blog_type"], attributes: ["type"] },
-        },
-      ],
-      through: {
-        attributes: ["status"],
-        where: { status: true },
+      model: model[selectModel],
+      where: { status: true },
+      attributes: ["status"],
+      include: {
+        model: model["Blogs"],
+        attributes: ["title", "subtitle", "thumbnail", "link", "id"],
+        include: [
+          { model: model["Dates"], attributes: ["date"] },
+          {
+            model: model["Users"],
+            attributes: ["wecode_nth", "user_name", "user_thumbnail"],
+            include: { model: model["Blog_type"], attributes: ["type"] },
+          },
+        ],
       },
     },
   });
 
-  const isOtherStatus = async (postId, selectType) => {
-    const changeStr = { like: "Bookmarks", bookmark: "Likes" };
-    const likeOrBookmarkStatus = await model[changeStr[selectType]].findOne({
+  const isOtherStatus = async (postId, selectModel) => {
+    const changeStr = { Likes: "Bookmarks", Bookmarks: "Likes" };
+    const likeOrBookmarkStatus = await model[changeStr[selectModel]].findOne({
       where: { blog_id: postId },
       attributes: ["status"],
     });
@@ -33,24 +33,27 @@ const getLikedOrBookmarkPosts = async ({ userId, selectType }) => {
     return likeOrBookmarkStatus ? likeOrBookmarkStatus.status : false;
   };
 
+  changeKey = { Likes: "likes", Bookmarks: "bookmarks" };
   let posts = [];
-  for (let post of likedOrBookmarkedPosts[selectType]) {
-    const otherStatus = await isOtherStatus(post.id, selectType);
-    const likedOrBookmarkedPost = {
-      id: post.id,
-      title: post.title,
-      subtitle: post.subtitle,
-      link: post.link,
-      thumbnail: post.thumbnail,
-      date: post.date.date,
-      user_name: post.user.user_name,
-      user_profile: post.user.user_thumbnail,
-      nth: post.user.wecode_nth,
-      type: post.user.blog_type.type,
-      like: post.likes ? post.likes.status : otherStatus,
-      bookmark: post.bookmarks ? post.bookmarks.status : otherStatus,
-    };
-    posts = [...posts, likedOrBookmarkedPost];
+  if (likedOrBookmarkedPosts) {
+    for (let post of likedOrBookmarkedPosts[changeKey[selectModel]]) {
+      const otherStatus = await isOtherStatus(post.blog.id, selectModel);
+      const likedOrBookmarkedPost = {
+        id: post.blog.id,
+        title: post.blog.title,
+        subtitle: post.blog.subtitle,
+        link: post.blog.link,
+        thumbnail: post.blog.thumbnail,
+        date: post.blog.date.date,
+        user_name: post.blog.user.user_name,
+        user_profile: post.blog.user.user_thumbnail,
+        nth: post.blog.user.wecode_nth,
+        type: post.blog.user.blog_type.type,
+        like: selectModel === "Likes" ? post.status : otherStatus,
+        bookmark: selectModel === "Bookmarks" ? post.status : otherStatus,
+      };
+      posts = [...posts, likedOrBookmarkedPost];
+    }
   }
 
   return posts;

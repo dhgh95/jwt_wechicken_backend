@@ -52,25 +52,38 @@ model["Blogs"].belongsTo(model["Dates"], {
   targetKey: "id",
 });
 
-model["Users"].belongsToMany(model["Blogs"], {
-  through: "likes",
+model["Users"].hasMany(model["Likes"], {
   foreignKey: "user_id",
-  as: "like",
+  sourceKey: "id",
 });
-model["Blogs"].belongsToMany(model["Users"], {
-  through: "likes",
+model["Likes"].belongsTo(model["Users"], {
+  foreignKey: "user_id",
+  targetKey: "id",
+});
+model["Blogs"].hasMany(model["Likes"], {
   foreignKey: "blog_id",
-  as: "like",
+  sourceKey: "id",
+});
+model["Likes"].belongsTo(model["Blogs"], {
+  foreignKey: "blog_id",
+  targetKey: "id",
 });
 
-model["Users"].belongsToMany(model["Blogs"], {
-  through: "bookmarks",
+model["Users"].hasMany(model["Bookmarks"], {
   foreignKey: "user_id",
-  as: "bookmark",
+  sourceKey: "id",
 });
-model["Blogs"].belongsToMany(model["Users"], {
-  through: "bookmarks",
+model["Bookmarks"].belongsTo(model["Users"], {
+  foreignKey: "user_id",
+  targetKey: "id",
+});
+model["Blogs"].hasMany(model["Bookmarks"], {
   foreignKey: "blog_id",
-  as: "bookmark",
+  sourceKey: "id",
 });
+model["Bookmarks"].belongsTo(model["Blogs"], {
+  foreignKey: "blog_id",
+  targetKey: "id",
+});
+
 module.exports = { model, sequelize };

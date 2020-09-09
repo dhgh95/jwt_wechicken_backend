@@ -1,4 +1,3 @@
-const { model } = require("../models");
 const {
   getLikedOrBookmarkPosts,
   isLikeOrBookmark,
@@ -9,7 +8,7 @@ const getPostsLike = async (req, res, next) => {
     const { id } = req.user;
     const posts = await getLikedOrBookmarkPosts({
       userId: id,
-      selectType: "like",
+      selectModel: "Likes",
     });
 
     res.status(201).json({ message: "LIKED", posts });
@@ -23,7 +22,7 @@ const getPostsBookMarks = async (req, res, next) => {
     const { id } = req.user;
     const posts = await getLikedOrBookmarkPosts({
       userId: id,
-      selectType: "bookmark",
+      selectModel: "Bookmarks",
     });
 
     res.status(201).json({ message: "BOOKMARK", posts });

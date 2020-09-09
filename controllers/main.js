@@ -20,6 +20,7 @@ const getMainPosts = async (req, res, next) => {
           attributes: ["date"],
         },
       ],
+      order: [[{ model: ["Dates"] }, "date", "DESC"]],
     });
 
     let posts = [];

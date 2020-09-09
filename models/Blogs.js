@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
       },
       thumbnail: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(800),
       },
       link: {
         type: DataTypes.STRING(800),
