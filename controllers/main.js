@@ -8,7 +8,7 @@ const getMainPosts = async (req, res, next) => {
     const allPosts = await model["Blogs"].findAll({
       offset: Number(size) * Number(page),
       limit: Number(size),
-      attributes: ["title", "subtitle", "thumbnail", "link", "date_id", "id"],
+      attributes: ["title", "subtitle", "thumbnail", "link", "id"],
       include: [
         {
           model: model["Users"],
