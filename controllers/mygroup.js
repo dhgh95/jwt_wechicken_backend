@@ -42,7 +42,7 @@ const getPageDetails = async (req, res, next) => {
       limit: 3,
       include: {
         model: model["Users"],
-        where: { wecode_nth: 10 },
+        where: { wecode_nth },
         attributes: ["user_name", "user_thumbnail"],
       },
     });
@@ -88,6 +88,7 @@ const getPageDetails = async (req, res, next) => {
         },
       ],
     });
+
     const by_days = {
       MON: [],
       TUE: [],
@@ -115,9 +116,17 @@ const getPageDetails = async (req, res, next) => {
         type: basicPost.user.blog_type.type,
       };
       by_days[day] = [...by_days[day], post];
-      userPostsCounting[basicPost.user.gmail]
-        ? (userPostsCounting[basicPost.user.gmail] += 1)
-        : (userPostsCounting[basicPost.user.gmail] = 1);
+      if (basicPost.user.gmail === gmail) {
+        myProfile = {
+          ...myProfile,
+          postsCount: myProfile.postsCount ? (myProfile.postsCount += 1) : 1,
+        };
+      }
+      if (basicPost.user.gmail !== gmail) {
+        userPostsCounting[basicPost.user.gmail]
+          ? (userPostsCounting[basicPost.user.gmail] += 1)
+          : (userPostsCounting[basicPost.user.gmail] = 1);
+      }
     }
 
     res.status(200).json({
