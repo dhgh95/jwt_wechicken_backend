@@ -116,17 +116,9 @@ const getPageDetails = async (req, res, next) => {
         type: basicPost.user.blog_type.type,
       };
       by_days[day] = [...by_days[day], post];
-      if (basicPost.user.gmail === gmail) {
-        myProfile = {
-          ...myProfile,
-          postsCount: myProfile.postsCount ? (myProfile.postsCount += 1) : 1,
-        };
-      }
-      if (basicPost.user.gmail !== gmail) {
-        userPostsCounting[basicPost.user.gmail]
-          ? (userPostsCounting[basicPost.user.gmail] += 1)
-          : (userPostsCounting[basicPost.user.gmail] = 1);
-      }
+      userPostsCounting[basicPost.user.gmail]
+        ? (userPostsCounting[basicPost.user.gmail] += 1)
+        : (userPostsCounting[basicPost.user.gmail] = 1);
     }
 
     res.status(200).json({
