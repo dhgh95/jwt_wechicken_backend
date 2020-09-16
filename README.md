@@ -21,9 +21,9 @@
 - MySQL
 - Git /Github
 
-#### 리액트 라이브러리
+#### 노드 라이브러리
 
-- React-router-dom
+- ??
 
 ### 2. 협업 툴
 
