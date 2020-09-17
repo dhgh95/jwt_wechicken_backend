@@ -22,13 +22,19 @@ const getPageDetails = async (req, res, next) => {
         ["user_name", "name"],
         ["user_thumbnail", "profile"],
       ],
+      include: { model: model["Blog_type"], attributes: ["type"] },
     });
 
     let myProfile = {};
     let users = [];
     joinUsers.forEach((user) => {
       if (user.gmail === gmail) {
-        myProfile = user;
+        myProfile = {
+          gmail: user.gmail,
+          name: user.user_name,
+          profile: user.user_thumbnail,
+          blog_type: user.blog_type.type,
+        };
       }
       if (user.gmail !== gmail) {
         users = [...users, user];
@@ -67,7 +73,6 @@ const getPageDetails = async (req, res, next) => {
       first: moment().subtract(week.first, "d").format("YYYY.MM.DD"),
       last: moment().add(week.last, "d").format("YYYY.MM.DD"),
     };
-
     const posts = await model["Blogs"].findAll({
       attributes: ["title", "subtitle", "thumbnail", "link", "id"],
       include: [
@@ -88,7 +93,6 @@ const getPageDetails = async (req, res, next) => {
         },
       ],
     });
-
     const by_days = {
       MON: [],
       TUE: [],
@@ -228,6 +232,31 @@ const joinGroup = async (req, res, next) => {
   }
 };
 
+const addPost = async (req, res, next) => {
+  try {
+    const { id } = req.user;
+    const { title, link, date } = req.body;
+
+    const [DBdate] = await model["Dates"].findOrCreate({
+      where: { date },
+      defaults: { date },
+    });
+
+    const post = {
+      title,
+      link,
+      date_id: DBdate.id,
+      user_id: id,
+    };
+
+    await model["Blogs"].create(post);
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
+
 const updateGroup = async (req, res, next) => {
   try {
     const { id } = req.user;
@@ -296,6 +325,7 @@ const createOrModifyMyGroup = async (req, res, next) => {
 module.exports = {
   getPageDetails,
   joinGroup,
+  addPost,
   updateGroup,
   createOrModifyMyGroup,
   getCalendar,

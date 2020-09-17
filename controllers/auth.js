@@ -2,7 +2,6 @@ const { googleAuth, createToken } = require("../services/auth");
 const { model } = require("../models");
 const { getAllPosts } = require("../scraper");
 const events = require("events");
-const scraperEmitter = new events.EventEmitter();
 
 const googleLogin = async (req, res, next) => {
   try {
@@ -80,6 +79,8 @@ const additional = async (req, res, next) => {
       attributes: ["status"],
     });
 
+    const scraperEmitter = new events.EventEmitter();
+
     scraperEmitter.once("done", async (allPosts) => {
       for (post of allPosts) {
         const [date] = await model["Dates"].findOrCreate({
@@ -87,13 +88,14 @@ const additional = async (req, res, next) => {
           defaults: { date: post.date },
         });
 
-        const blog = {
-          ...post,
-          date_id: date.id,
-          user_id: user.id,
-        };
-
-        await model["Blogs"].create(blog);
+        if (post.link.split("/")[3] === blog_address.split("/")[3]) {
+          const blog = {
+            ...post,
+            date_id: date.id,
+            user_id: user.id,
+          };
+          await model["Blogs"].create(blog);
+        }
       }
       console.log("DB => saved_post");
     });
