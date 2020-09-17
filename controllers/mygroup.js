@@ -31,8 +31,8 @@ const getPageDetails = async (req, res, next) => {
       if (user.gmail === gmail) {
         myProfile = {
           gmail: user.gmail,
-          name: user.user_name,
-          profile: user.user_thumbnail,
+          name: user.name,
+          profile: user.profile,
           blog_type: user.blog_type.type,
         };
       }
