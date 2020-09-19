@@ -1,14 +1,21 @@
 const puppeteer = require("puppeteer");
 const mediumChangeDateFormat = require("../utils/mediumChangeDateFormat");
-const velogChagneDateFormat = require("../utils/velogChangeDateFormat");
+const velogChangeDateFormat = require("../utils/velogChangeDateFormat");
+const mediumEvaluate = require("./mediumEvaluate");
+const velogEvaluate = require("./velogEvaluate");
 
 class InfiniteScrollBrowser {
-  constructor() {
+  constructor(url, blogType, scraperEmitter) {
     this.browser = null;
     this.page = null;
-    this.canScroll = true;
     this.isEndReached = false;
-    this.isScraped = false;
+    this.scraperEmitter = scraperEmitter;
+    this.url = url;
+    this.blogType = blogType;
+    this.endpoint =
+      blogType === "medium"
+        ? "https://medium.com/_/graphql"
+        : "https://v2.velog.io/graphql";
   }
 
   async start(opts) {
@@ -18,66 +25,16 @@ class InfiniteScrollBrowser {
     this.browser = await puppeteer.launch(lauchOpts);
   }
 
-  async checkIsEnd(blogType) {
-    let isEnd = false;
-    if (blogType === "medium") {
-      const h4Values = await this.page.$$eval("div > div > h4", (h4Tags) =>
-        h4Tags.map((h4Tag) => h4Tag.innerText)
-      );
-
-      isEnd = !!h4Values.find((value) => value.includes("Claps from"));
-    }
-
-    if (blogType === "velog") {
-      const postsCount = await this.page.$eval(
-        "#root > div > div > div:nth-child(4) > div > div > div > div > ul > li > span",
-        (postsCountTag) => postsCountTag.innerText
-      );
-
-      const postsTagsLength = await this.page.$$eval(
-        "#root > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(3) > div > div",
-        (postsTags) => postsTags.length
-      );
-
-      isEnd = Number(postsCount.match(/[0-9]+/g)) === postsTagsLength;
-    }
-
-    return isEnd;
-  }
-
-  async scrollDown(blogType) {
-    try {
-      await this.page.waitFor(500);
-      await this.page.evaluate(() => {
-        window.scrollTo(0, document.body.scrollHeight);
-      });
-
-      const isEnd = await this.checkIsEnd(blogType);
-      if (isEnd) {
-        await this.page.waitFor(3000);
-        this.isEndReached = true;
-        return true;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  scrollFreeze() {
-    this.canScroll = false;
-  }
-
-  async open({
-    url,
-    loadImages = true,
-    endpoint,
-    blogType,
-    evaluateCallBack,
-    scraperEmitter,
-  }) {
+  async open(loadImages = true) {
     try {
       this.page = await this.browser.newPage();
       this.page.setViewport({ width: 1280, height: 926 });
+      await this.page.exposeFunction(
+        "changeDateFormat",
+        this.blogType === "medium"
+          ? mediumChangeDateFormat
+          : velogChangeDateFormat
+      );
 
       this.page.setRequestInterception(true);
       this.page.on("request", (request) => {
@@ -87,32 +44,38 @@ class InfiniteScrollBrowser {
       });
 
       this.page.on("response", async (res) => {
-        // when response received
         const resUrl = res.url();
 
-        if (resUrl.includes(endpoint) && !this.isEndReached) {
-          const isEnd = await this.scrollDown(blogType);
-
-          if (isEnd && !this.isScraped) {
-            await this.page.exposeFunction(
-              "changeDateFormat",
-              blogType === "medium"
-                ? mediumChangeDateFormat
-                : velogChagneDateFormat
-            );
-
-            let allPosts = await this.extract(evaluateCallBack);
-
-            scraperEmitter.emit("done", allPosts);
-            scraperEmitter.emit("close");
-          }
-        }
+        if (resUrl.includes(this.endpoint)) await this.scrollDown();
       });
 
-      await this.goTo({ url });
+      await this.goTo({ url: this.url });
       await this.scrollDown();
     } catch (e) {
       console.error(e);
+    }
+  }
+
+  async scrollDown() {
+    try {
+      await this.page.waitFor(500);
+      await this.page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      await this.page.waitForResponse(this.endpoint, {
+        timeout: 3000,
+      });
+    } catch (err) {
+      if (!this.isEndReached) {
+        const allPosts = await this.page.evaluate(
+          this.blogType === "medium" ? mediumEvaluate : velogEvaluate
+        );
+
+        this.scraperEmitter.emit("done", allPosts);
+        this.scraperEmitter.emit("close");
+        this.isEndReached = true;
+      }
     }
   }
 
@@ -121,15 +84,6 @@ class InfiniteScrollBrowser {
       const pageOpts = opts ? opts : { waitLoad: true, waitNetworkIdle: true };
       await this.page.goto(url, pageOpts);
       await this.page.waitFor(100);
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
-  async extract(evaluateCallBack) {
-    try {
-      this.isScraped = true;
-      return await this.page.evaluate(evaluateCallBack);
     } catch (e) {
       console.error(e);
     }
