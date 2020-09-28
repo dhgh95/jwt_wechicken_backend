@@ -1,26 +1,33 @@
-const { model } = require("../models");
+const {
+  Blogs,
+  Users,
+  Blog_type,
+  Dates,
+  Likes,
+  Bookmarks,
+} = require("../models");
 
 const getMainPosts = async (req, res, next) => {
   try {
     const user = req.user;
     const { size, page } = req.query;
 
-    const allPosts = await model["Blogs"].findAll({
+    const allPosts = await Blogs.findAll({
       offset: Number(size) * Number(page),
       limit: Number(size),
       attributes: ["title", "subtitle", "thumbnail", "link", "id"],
       include: [
         {
-          model: model["Users"],
+          model: Users,
           attributes: ["user_name", "user_thumbnail", "wecode_nth"],
-          include: { model: model["Blog_type"], attributes: ["type"] },
+          include: { model: Blog_type, attributes: ["type"] },
         },
         {
-          model: model["Dates"],
+          model: Dates,
           attributes: ["date"],
         },
       ],
-      order: [[{ model: ["Dates"] }, "date", "DESC"]],
+      order: [[{ model: Dates }, "date", "DESC"]],
     });
 
     let posts = [];
@@ -29,11 +36,11 @@ const getMainPosts = async (req, res, next) => {
       let isLikedPost = {};
       let isBookMarkedPost = {};
       if (user) {
-        isLikedPost = await model["Likes"].findOne({
+        isLikedPost = await Likes.findOne({
           where: { user_id: user.id, blog_id: basicPost.id },
           attributes: ["status"],
         });
-        isBookMarkedPost = await model["Bookmarks"].findOne({
+        isBookMarkedPost = await Bookmarks.findOne({
           where: { user_id: user.id, blog_id: basicPost.id },
           attributes: ["status"],
         });

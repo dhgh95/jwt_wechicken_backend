@@ -1,5 +1,12 @@
 const Sequelize = require("sequelize");
-const { model } = require("../models");
+const {
+  Blogs,
+  Users,
+  Blog_type,
+  Dates,
+  Likes,
+  Bookmarks,
+} = require("../models");
 const Op = Sequelize.Op;
 
 const search = async (req, res, next) => {
@@ -7,18 +14,18 @@ const search = async (req, res, next) => {
     const { keyword } = req.query;
     const user = req.user;
 
-    const searchPosts = await model["Blogs"].findAll({
+    const searchPosts = await Blogs.findAll({
       where: {
         title: { [Op.like]: `%${keyword}%` },
       },
       attributes: ["title", "subtitle", "thumbnail", "link", "id"],
       include: [
         {
-          model: model["Users"],
+          model: Users,
           attributes: ["user_name", "user_thumbnail", "wecode_nth"],
-          include: { model: model["Blog_type"], attributes: ["type"] },
+          include: { model: Blog_type, attributes: ["type"] },
         },
-        { model: model["Dates"], attributes: ["date"] },
+        { model: Dates, attributes: ["date"] },
       ],
     });
 
@@ -27,11 +34,11 @@ const search = async (req, res, next) => {
       let isLikedPost = {};
       let isBookMarkedPost = {};
       if (user) {
-        isLikedPost = await model["Likes"].findOne({
+        isLikedPost = await Likes.findOne({
           where: { user_id: user.id, blog_id: searchPost.id },
           attributes: ["status"],
         });
-        isBookMarkedPost = await model["Bookmarks"].findOne({
+        isBookMarkedPost = await Bookmarks.findOne({
           where: { user_id: user.id, blog_id: searchPost.id },
           attributes: ["status"],
         });

@@ -1,4 +1,4 @@
-const { model } = require("../models");
+const { model, Blogs, Dates, Users } = require("../models");
 
 const getLikedOrBookmarkPosts = async ({ userId, selectModel }) => {
   const likedOrBookmarkedPosts = await model["Users"].findOne({
@@ -9,12 +9,12 @@ const getLikedOrBookmarkPosts = async ({ userId, selectModel }) => {
       where: { status: true },
       attributes: ["status"],
       include: {
-        model: model["Blogs"],
+        model: Blogs,
         attributes: ["title", "subtitle", "thumbnail", "link", "id"],
         include: [
-          { model: model["Dates"], attributes: ["date"] },
+          { model: Dates, attributes: ["date"] },
           {
-            model: model["Users"],
+            model: Users,
             attributes: ["wecode_nth", "user_name", "user_thumbnail"],
             include: { model: model["Blog_type"], attributes: ["type"] },
           },
@@ -74,9 +74,10 @@ const isLikeOrBookmark = async ({ userId, blogId, selectModel }) => {
 
   if (!likeOrBookmarkedPost) {
     const likeOrBookmarkPost = {
-      user_id: userId,
-      blog_id: blogId,
+      userId,
+      blogId,
     };
+
     await model[selectModel].create(likeOrBookmarkPost);
   }
 };

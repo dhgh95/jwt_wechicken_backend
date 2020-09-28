@@ -1,28 +1,28 @@
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 const moment = require("moment");
-const { model } = require("../models/");
+const { Wecode, Users, Blog_type, Blogs, Dates } = require("../models/");
 const { getRecentPosts } = require("../scraper");
 
 const getPageDetails = async (req, res, next) => {
   try {
     const { gmail, wecode_nth, is_group_joined } = req.user;
 
-    const myGroup = await model["Wecode_nth"].findOne({
+    const myGroup = await Wecode.findOne({
       where: {
         nth: wecode_nth,
       },
       attributes: ["title", "count", "penalty"],
     });
 
-    const joinUsers = await model["Users"].findAll({
+    const joinUsers = await Users.findAll({
       where: { wecode_nth, is_group_joined: true },
       attributes: [
         "gmail",
         ["user_name", "name"],
         ["user_thumbnail", "profile"],
       ],
-      include: { model: model["Blog_type"], attributes: ["type"] },
+      include: { model: Blog_type, attributes: ["type"] },
     });
 
     let myProfile = {};
@@ -41,14 +41,14 @@ const getPageDetails = async (req, res, next) => {
       }
     });
 
-    let Ranks = await model["Blogs"].findAll({
+    let Ranks = await Blogs.findAll({
       group: ["user_id"],
       attributes: [[Sequelize.fn("COUNT", "user_id"), "user_posts"]],
       order: Sequelize.literal("user_posts DESC"),
       limit: 3,
       include: {
-        model: model["Users"],
-        where: { wecode_nth },
+        model: Users,
+        where: { wecode_nth, is_group_joined: true },
         attributes: ["user_name", "user_thumbnail"],
       },
     });
@@ -73,17 +73,17 @@ const getPageDetails = async (req, res, next) => {
       first: moment().subtract(week.first, "d").format("YYYY.MM.DD"),
       last: moment().add(week.last, "d").format("YYYY.MM.DD"),
     };
-    const posts = await model["Blogs"].findAll({
+    const posts = await Blogs.findAll({
       attributes: ["title", "subtitle", "thumbnail", "link", "id"],
       include: [
         {
-          model: model["Users"],
+          model: Users,
           where: { wecode_nth, is_group_joined: true },
           attributes: ["user_name", "user_thumbnail", "gmail"],
-          include: { model: model["Blog_type"], attributes: ["type"] },
+          include: { model: Blog_type, attributes: ["type"] },
         },
         {
-          model: model["Dates"],
+          model: Dates,
           where: {
             date: {
               [Op.and]: { [Op.gte]: week.first, [Op.lte]: week.last },
@@ -166,17 +166,17 @@ const getCalendar = async (req, res, next) => {
         .format("YYYY.MM.DD"),
     };
 
-    const posts = await model["Blogs"].findAll({
+    const posts = await Blogs.findAll({
       attributes: ["title", "subtitle", "thumbnail", "link", "id"],
       include: [
         {
-          model: model["Users"],
+          model: Users,
           where: { wecode_nth, is_group_joined: true },
           attributes: ["user_name", "user_thumbnail"],
-          include: { model: model["Blog_type"], attributes: ["type"] },
+          include: { model: Blog_type, attributes: ["type"] },
         },
         {
-          model: model["Dates"],
+          model: Dates,
           where: {
             date: {
               [Op.and]: { [Op.gte]: week.first, [Op.lte]: week.last },
@@ -223,7 +223,7 @@ const getCalendar = async (req, res, next) => {
 const joinGroup = async (req, res, next) => {
   try {
     const { id } = req.user;
-    await model["Users"].update({ is_group_joined: true }, { where: { id } });
+    await Users.update({ is_group_joined: true }, { where: { id } });
     req.user.dataValues = { ...req.user.dataValues, is_group_joined: true };
 
     next();
@@ -234,10 +234,10 @@ const joinGroup = async (req, res, next) => {
 
 const addPost = async (req, res, next) => {
   try {
-    const { id } = req.user;
+    const user = req.user;
     const { title, link, date } = req.body;
 
-    const [DBdate] = await model["Dates"].findOrCreate({
+    const [findOrCreateDate] = await Dates.findOrCreate({
       where: { date },
       defaults: { date },
     });
@@ -245,11 +245,11 @@ const addPost = async (req, res, next) => {
     const post = {
       title,
       link,
-      date_id: DBdate.id,
-      user_id: id,
     };
 
-    await model["Blogs"].create(post);
+    const createPost = await Blogs.create(post);
+    await findOrCreateDate.addBlog(createPost);
+    await user.addBlog(createPost);
 
     next();
   } catch (err) {
@@ -264,16 +264,16 @@ const updateGroup = async (req, res, next) => {
     const {
       blog_address,
       blog_type: { type },
-    } = await model["Users"].findOne({
+    } = await Users.findOne({
       where: { id },
       attributes: ["blog_address"],
-      include: { model: model["Blog_type"], attributes: ["type"] },
+      include: { model: Blog_type, attributes: ["type"] },
     });
 
     const posts = await getRecentPosts({ url: blog_address, blogType: type });
 
     for (let post of posts) {
-      const [date] = await model["Dates"].findOrCreate({
+      const [date] = await Dates.findOrCreate({
         where: { date: post.date },
         defaults: { date: post.date },
       });
@@ -283,11 +283,11 @@ const updateGroup = async (req, res, next) => {
         subtitle: post.subtitle,
         thumbnail: post.thumbnail,
         link: post.link,
-        date_id: date.id,
-        user_id: id,
+        dateId: date.id,
+        userId: id,
       };
 
-      await model["Blogs"].findOrCreate({
+      await Blogs.findOrCreate({
         where: { title: post.title },
         defaults: blog,
       });
@@ -312,7 +312,7 @@ const createOrModifyMyGroup = async (req, res, next) => {
       status: true,
     };
 
-    await model["Wecode_nth"].update(createMyGroup, {
+    await Wecode.update(createMyGroup, {
       where: { nth: wecode_nth },
     });
 
