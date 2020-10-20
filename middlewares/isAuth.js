@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { model } = require("../models");
+const { Users } = require("../models");
 const { errorGenerator } = require("../utils");
 
 module.exports = async (req, res, next) => {
@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
     if (token) {
       const { user_id } = jwt.verify(token, process.env.SECRET_KEY);
 
-      const user = await model["Users"].findOne({ where: { id: user_id } });
+      const user = await Users.findOne({ where: { id: user_id } });
       !user && errorGenerator("Not found User", "404");
 
       req.user = user;

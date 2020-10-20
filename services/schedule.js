@@ -1,12 +1,12 @@
 const schedule = require("node-schedule");
-const { model } = require("../models");
+const { Users, Blog_type, Dates, Blogs } = require("../models");
 const { getRecentPosts } = require("../scraper");
 
 const todayUpdatePosts = schedule.scheduleJob("0 35 23 * * *", async () => {
   try {
-    const users = await model["Users"].findAll({
+    const users = await Users.findAll({
       attributes: ["id", "blog_address"],
-      include: { model: model["Blog_type"], attributes: ["type"] },
+      include: { model: Blog_type, attributes: ["type"] },
     });
 
     const arrayToChucks = (array, CHUNKSIZE) => {
@@ -21,7 +21,7 @@ const todayUpdatePosts = schedule.scheduleJob("0 35 23 * * *", async () => {
     const usersId = users.map(({ id }) => id);
     const postsPromise = arrayToChucks(
       users.map(({ blog_address, blog_type: { type } }) => {
-        return getRecentPosts({ url: blog_address, blog_type: type });
+        return getRecentPosts({ url: blog_address, blogType: type });
       }),
       4
     );
@@ -38,7 +38,7 @@ const todayUpdatePosts = schedule.scheduleJob("0 35 23 * * *", async () => {
     if (posts) {
       for (let { userId, posts } of usersToPosts) {
         for (let post of posts) {
-          const [date] = await model["Dates"].findOrCreate({
+          const [date] = await Dates.findOrCreate({
             where: { date: post.date },
             defaults: { date: post.date },
           });
@@ -47,12 +47,12 @@ const todayUpdatePosts = schedule.scheduleJob("0 35 23 * * *", async () => {
             title: post.title,
             subtitle: post.subtitle,
             thumbnail: post.thumbnail,
-            date_id: date.id,
-            user_id: userId,
+            dateId: date.id,
+            userId,
             link: post.link,
           };
 
-          await model["Blogs"].findOrCreate({
+          await Blogs.findOrCreate({
             where: { title: post.title },
             defaults: blog,
           });

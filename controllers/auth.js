@@ -1,5 +1,5 @@
 const { googleAuth, createToken } = require("../services/auth");
-const { model } = require("../models");
+const { Users, Wecode, Blog_type, Dates, Blogs } = require("../models");
 const { getAllPosts } = require("../scraper");
 const events = require("events");
 
@@ -7,7 +7,7 @@ const googleLogin = async (req, res, next) => {
   try {
     const { googleToken } = req.body;
     const googleUser = await googleAuth(googleToken);
-    const user = await model["Users"].findOne({
+    const user = await Users.findOne({
       where: { gmail_id: googleUser.sub },
     });
 
@@ -17,7 +17,7 @@ const googleLogin = async (req, res, next) => {
 
     if (user) {
       const token = createToken(user.id, user.wecode_nth);
-      const { status, user_id } = await model["Wecode_nth"].findOne({
+      const { status, user_id } = await Wecode.findOne({
         where: { nth: user.wecode_nth },
         attributes: ["status", "user_id"],
       });
@@ -47,13 +47,13 @@ const additional = async (req, res, next) => {
       is_group_joined,
     } = req.body;
 
-    await model["Wecode_nth"].findOrCreate({
+    const [findOrCreateWecode] = await Wecode.findOrCreate({
       where: { nth: wecode_nth },
       default: { nth: wecode_nth },
     });
 
     const blog_type = blog_address.match(/[a-z]+/g)[1];
-    const [{ id }] = await model["Blog_type"].findOrCreate({
+    const [findOrCreateBlogType] = await Blog_type.findOrCreate({
       where: { type: blog_type },
       default: { type: blog_type },
     });
@@ -61,56 +61,52 @@ const additional = async (req, res, next) => {
     const additionalInfo = {
       user_name,
       blog_address,
-      blog_type_id: id,
-      wecode_nth,
       user_thumbnail: req.file ? req.file.location : user_thumbnail,
       gmail_id,
       gmail,
       is_group_joined,
     };
 
-    await model["Users"].create(additionalInfo);
+    const createUser = await Users.create(additionalInfo);
+    await findOrCreateWecode.addUser(createUser);
+    await findOrCreateBlogType.addUser(createUser);
 
-    const user = await model["Users"].findOne({ where: { gmail_id } });
+    const user = await Users.findOne({
+      where: { gmail_id },
+      include: { model: Wecode, attributes: ["status"] },
+    });
     const token = createToken(user.id, user.wecode_nth);
     const profile = user.user_thumbnail;
-    const { status } = await model["Wecode_nth"].findOne({
-      where: { nth: user.wecode_nth },
-      attributes: ["status"],
-    });
 
     const scraperEmitter = new events.EventEmitter();
-
     scraperEmitter.once("done", async (allPosts) => {
       for (post of allPosts) {
-        const [date] = await model["Dates"].findOrCreate({
+        const [findOrCreateDate] = await Dates.findOrCreate({
           where: { date: post.date },
           defaults: { date: post.date },
         });
 
         if (post.link.split("/")[3] === blog_address.split("/")[3]) {
-          const blog = {
-            ...post,
-            date_id: date.id,
-            user_id: user.id,
-          };
-          await model["Blogs"].create(blog);
+          const createBlog = await Blogs.create(post);
+          await findOrCreateDate.addBlog(createBlog);
+          await user.addBlog(createBlog);
         }
       }
       console.log("DB => saved_post");
     });
 
-    getAllPosts({
-      url: blog_address,
-      blogType: blog_type,
-      scraperEmitter,
-    });
+    blog_type === "velog" &&
+      getAllPosts({
+        url: blog_address,
+        blogType: blog_type,
+        scraperEmitter,
+      });
 
     res.status(201).json({
       message: "User created!!!",
       token,
       profile,
-      myGroupStatus: status,
+      myGroupStatus: user.wecode.status,
       nth: user.wecode_nth,
     });
   } catch (err) {

@@ -1,4 +1,4 @@
-const { model } = require("../models");
+const { Users } = require("../models");
 
 const getMyPage = async (req, res, next) => {
   try {
@@ -38,7 +38,7 @@ const modifyMyProfile = async (req, res, next) => {
     };
 
     const { id } = req.user;
-    await model["Users"].update(modifyProfile, { where: { id } });
+    await Users.update(modifyProfile, { where: { id } });
 
     res.status(200).json({ message: "MODIFY", profile: req.file?.location });
   } catch (err) {
@@ -52,7 +52,7 @@ const deleteMyProfile = async (req, res, next) => {
     const { id } = req.user;
 
     if (deleted === "user_thumbnail") {
-      await model["Users"].update({ user_thumbnail: null }, { where: { id } });
+      await Users.update({ user_thumbnail: null }, { where: { id } });
     }
 
     res.status(200).json({ message: "DELETE" });

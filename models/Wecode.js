@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
   return sequelize.define(
-    "wecode_nth",
+    "wecode",
     {
       nth: {
         type: DataTypes.INTEGER,
