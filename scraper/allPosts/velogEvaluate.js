@@ -3,6 +3,9 @@ module.exports = async () => {
     "#root > div:nth-child(2) > div:nth-child(3) > div:nth-child(4) > div:nth-child(3) > div > div"
   );
 
+  const isEmpty = posts[0].className === "message" && posts.length === 1;
+  if (isEmpty) return [];
+
   let postsArray = [];
 
   for (let post of [...posts]) {
