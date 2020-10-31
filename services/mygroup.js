@@ -14,13 +14,16 @@ const getWeekPosts = async ({ selectedDate = false, wecode_nth }) => {
     6: { first: 5, last: 1 },
     0: { first: 6 },
   };
-  const momentHandler = selectedDate
-    ? moment(selectedDate.match(/[0-9]+/g).join(""))
-    : moment();
-  let week = weekFistAndLastDay[momentHandler.day()];
+  const seletedWeekDate = selectedDate
+    ? selectedDate.match(/[0-9]+/g).join("")
+    : moment().format("YYYYMMDD");
+  let week = weekFistAndLastDay[moment(seletedWeekDate).day()];
+
   week = {
-    first: momentHandler.subtract(week.first, "d").format("YYYY.MM.DD"),
-    last: momentHandler.add(week.last, "d").format("YYYY.MM.DD"),
+    first: moment(seletedWeekDate)
+      .subtract(week.first, "d")
+      .format("YYYY.MM.DD"),
+    last: moment(seletedWeekDate).add(week.last, "d").format("YYYY.MM.DD"),
   };
 
   const posts = await Blogs.findAll({
