@@ -1,5 +1,6 @@
 scraper/json/
 images/
+.idea/
 
 ### Default settings ###
 # Created by https://www.toptal.com/developers/gitignore/api/node

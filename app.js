@@ -6,7 +6,6 @@ const bodyParser = require("body-parser");
 const logger = require("morgan")("dev");
 
 const routes = require("./routes");
-const autoTodayUpdatePosts = require("./services/schedule");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -20,10 +19,8 @@ app.use("/images", express.static("images"));
 // routes
 routes(app);
 
-// 자동 크롤링
-autoTodayUpdatePosts;
-
 //middleware
+//https://joooohee.tistory.com/10
 
 app.use((error, req, res, next) => {
   const { statusCode, message } = error;
