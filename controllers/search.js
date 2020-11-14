@@ -11,7 +11,7 @@ const Op = Sequelize.Op;
 
 const search = async (req, res, next) => {
   try {
-    const { keyword } = req.query;
+    const { keyword, size, page } = req.query;
     const user = req.user;
 
     const searchPosts = await Blogs.findAll({
@@ -27,6 +27,9 @@ const search = async (req, res, next) => {
         },
         { model: Dates, attributes: ["date"] },
       ],
+      offset: Number(size) * Number(page),
+      limit: Number(size),
+      order: [[{ model: Dates }, "date", "DESC"]],
     });
 
     let posts = [];
