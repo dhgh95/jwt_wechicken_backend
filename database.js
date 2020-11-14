@@ -1,10 +1,10 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize } = require('sequelize')
 
-const sequelize = new Sequelize("jwt", "root", process.env.MYSQL_PASSWORD, {
-  host: "jwt.c5aaxafaq9h8.ap-northeast-2.rds.amazonaws.com",
+const sequelize = new Sequelize('jwt', 'root', process.env.MYSQL_PASSWORD, {
+  host: 'localhost',
   port: 3306,
   logging: false,
-  dialect: "mysql",
-});
+  dialect: 'mysql',
+})
 
-module.exports = sequelize;
+module.exports = sequelize
