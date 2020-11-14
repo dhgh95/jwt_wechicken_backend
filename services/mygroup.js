@@ -1,4 +1,4 @@
-const moment = require("moment");
+const dayjs = require("dayjs");
 const Sequelize = require("sequelize");
 const Op = Sequelize.Op;
 
@@ -14,13 +14,13 @@ const getWeekPosts = async ({ selectedDate = false, wecode_nth }) => {
     6: { first: 5, last: 1 },
     0: { first: 6 },
   };
-  const momentHandler = selectedDate
-    ? moment(selectedDate.match(/[0-9]+/g).join(""))
-    : moment();
-  let week = weekFistAndLastDay[momentHandler.day()];
+  const dayjsHandler = selectedDate
+    ? dayjs(selectedDate.match(/[0-9]+/g).join(""))
+    : dayjs();
+  let week = weekFistAndLastDay[dayjsHandler.day()];
   week = {
-    first: momentHandler.subtract(week.first, "d").format("YYYY.MM.DD"),
-    last: momentHandler.add(week.last, "d").format("YYYY.MM.DD"),
+    first: dayjsHandler.subtract(week.first, "d").format("YYYY.MM.DD"),
+    last: dayjsHandler.add(week.last, "d").format("YYYY.MM.DD"),
   };
 
   const posts = await Blogs.findAll({
@@ -57,7 +57,7 @@ const getWeekPosts = async ({ selectedDate = false, wecode_nth }) => {
   const strChangeDay = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   for (let basicPost of posts) {
     const day =
-      strChangeDay[moment(basicPost.date.date.replace(/\./g, "")).day()];
+      strChangeDay[dayjs(basicPost.date.date.replace(/\./g, "")).day()];
     const post = {
       id: basicPost.id,
       title: basicPost.title,
