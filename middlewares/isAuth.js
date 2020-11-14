@@ -1,22 +1,22 @@
-const jwt = require("jsonwebtoken");
-const { Users } = require("../models");
-const { errorGenerator } = require("../utils");
+const jwt = require('jsonwebtoken')
+const { Users } = require('../models')
+const { errorGenerator } = require('../utils')
 
 module.exports = async (req, res, next) => {
   try {
-    const token = req.get("Authorization");
+    const token = req.get('Authorization')
     if (token) {
-      const { user_id } = jwt.verify(token, process.env.SECRET_KEY);
+      const { user_id } = jwt.verify(token, process.env.SECRET_KEY)
 
-      const user = await Users.findOne({ where: { id: user_id } });
-      !user && errorGenerator("Not found User", "404");
+      const user = await Users.findOne({ where: { id: user_id } })
+      !user && errorGenerator('Not found User', '404')
 
-      req.user = user;
+      req.user = user
     }
-    next();
+    next()
   } catch (err) {
-    err.message = "Not authenticated";
-    err.statusCode = 401;
-    next(err);
+    err.message = 'Not authenticated'
+    err.statusCode = 401
+    next(err)
   }
-};
+}

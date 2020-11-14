@@ -1,8 +1,8 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes } = require('sequelize')
 
 module.exports = (sequelize) => {
   return sequelize.define(
-    "blogs",
+    'blogs',
     {
       title: {
         type: DataTypes.STRING,
@@ -18,15 +18,18 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING(800),
         allowNull: false,
       },
+      date_id: {
+        type: DataTypes.INTEGER,
+      },
     },
     {
       freezeTableName: true,
       paranoid: true,
       underscored: true,
       timestamps: true,
-      createdAt: "created_at",
-      updatedAt: "updated_at",
-      deletedAt: "deleted_at",
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+      deletedAt: 'deleted_at',
     }
-  );
-};
+  )
+}

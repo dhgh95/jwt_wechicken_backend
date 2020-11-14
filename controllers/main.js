@@ -5,45 +5,45 @@ const {
   Dates,
   Likes,
   Bookmarks,
-} = require("../models");
+} = require('../models')
 
 const getMainPosts = async (req, res, next) => {
   try {
-    const user = req.user;
-    const { size, page } = req.query;
+    const user = req.user
+    const { size = 10, page = 0 } = req.query
 
     const allPosts = await Blogs.findAll({
       offset: Number(size) * Number(page),
       limit: Number(size),
-      attributes: ["title", "subtitle", "thumbnail", "link", "id"],
+      attributes: ['title', 'subtitle', 'thumbnail', 'link', 'id'],
       include: [
         {
           model: Users,
-          attributes: ["user_name", "user_thumbnail", "wecode_nth"],
-          include: { model: Blog_type, attributes: ["type"] },
+          attributes: ['user_name', 'user_thumbnail', 'wecode_nth'],
+          include: { model: Blog_type, attributes: ['type'] },
         },
         {
           model: Dates,
-          attributes: ["date"],
+          attributes: ['date'],
         },
       ],
-      order: [[{ model: Dates }, "date", "DESC"]],
-    });
+      order: [[{ model: Dates }, 'date', 'DESC']],
+    })
 
-    let posts = [];
+    let posts = []
 
     for (basicPost of allPosts) {
-      let isLikedPost = {};
-      let isBookMarkedPost = {};
+      let isLikedPost = {}
+      let isBookMarkedPost = {}
       if (user) {
         isLikedPost = await Likes.findOne({
           where: { user_id: user.id, blog_id: basicPost.id },
-          attributes: ["status"],
-        });
+          attributes: ['status'],
+        })
         isBookMarkedPost = await Bookmarks.findOne({
           where: { user_id: user.id, blog_id: basicPost.id },
-          attributes: ["status"],
-        });
+          attributes: ['status'],
+        })
       }
       const post = {
         title: basicPost.title,
@@ -58,14 +58,14 @@ const getMainPosts = async (req, res, next) => {
         nth: basicPost.user.wecode_nth,
         like: (user && isLikedPost?.status) || false,
         bookmark: (user && isBookMarkedPost?.status) || false,
-      };
-      posts = [...posts, post];
+      }
+      posts = [...posts, post]
     }
 
-    res.status(200).json({ message: "MAIN", posts });
+    res.status(200).json({ message: 'MAIN', posts })
   } catch (err) {
-    next(err);
+    next(err)
   }
-};
+}
 
-module.exports = { getMainPosts };
+module.exports = { getMainPosts }
