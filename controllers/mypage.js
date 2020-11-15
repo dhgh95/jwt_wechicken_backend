@@ -73,7 +73,6 @@ const getMyPostsView = async (req, res, next) => {
           model: Blogs,
           attributes: ['title', 'subtitle', 'thumbnail', 'link', 'id'],
           include: { model: Dates, attributes: ['date'] },
-          order: [[{ model: Dates }, 'date', 'DESC']],
         },
       ],
     })
@@ -90,7 +89,7 @@ const getMyPostsView = async (req, res, next) => {
         id: post.id,
         nth: posts.wecode_nth,
       }
-    })
+    }).sort((a,b) => Number(b.date.replace(/\./g, ""))-Number(a.date.replace(/\./g, "")))
 
     res.status(200).json({ message: 'MY POSTS', myPosts })
   } catch (err) {
@@ -140,6 +139,7 @@ const deletePost = async (req, res, next) => {
   try {
     const { id: userIdFromToken } = req.user
     const { postId } = req.params
+    console.log(userIdFromToken, postId)
 
     const result = await Blogs.destroy({
       where: {
