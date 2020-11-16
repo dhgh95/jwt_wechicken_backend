@@ -19,7 +19,7 @@ const upload = multer({
       cb(null, { fieldName: file.fieldname });
     },
     key: function (req, file, cb) {
-      cb(null, file.originalname);
+      cb(null, `profile/${req.user.gmail}/profile.${file.originalname.split('.').pop()}`);
     },
   }),
 });
