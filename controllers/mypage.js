@@ -29,12 +29,10 @@ const getMyPage = async (req, res, next) => {
 const modifyMyProfile = async (req, res, next) => {
   try {
     const { blog_address } = req.body
-    const { leave } = req.query
 
     const modifyProfile = {
       user_thumbnail: req.file?.location,
       blog_address,
-      is_group_joined: leave === 'group' && false,
     }
 
     const { id } = req.user
